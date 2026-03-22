@@ -85,7 +85,7 @@ export default function App() {
       {/* Header */}
       <header className="mb-16 text-center">
         <h1 className="text-4xl font-black text-slate-800 tracking-tight">
-          出来レーレット
+          ルーレット
         </h1>
       </header>
 
@@ -146,10 +146,12 @@ export default function App() {
       {/* Explanation — below the fold */}
       <section className="mt-24 w-full max-w-3xl border-t border-slate-200 pt-8 pb-4 text-slate-400 text-sm space-y-2">
         <h2 className="text-base font-bold text-slate-400">このサービスについて</h2>
+        <h4 className="text-base font-bold">八百長ルーレット</h4>
         <p>
           項目リストの <span className="text-yellow-500 font-bold">★</span>{" "}
           ボタンを押すと、その項目を「確定当たり」として設定できます。
           スピン後は必ずその項目が選ばれます。
+          そう、お察しに通りこちらのルーレットは八百長ルーレットです。自分の案を押し通したい場合にぜひご利用ください。
         </p>
         <p>
           ★ を設定しない場合はランダムに選ばれます。
@@ -162,6 +164,9 @@ export default function App() {
         <h2 className="text-base font-bold text-slate-400">注意事項</h2>
         ⚠️ 本サービスの利用により生じたいかなる損害についても責任を負いません。
       </footer>
+
+      {/* Copyright */}
+      <p className="pb-6 text-xs text-slate-500">&copy; 2026 basekeita</p>
     </main>
   );
 }
