@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import ItemList from "./components/ItemList";
 import RouletteWheel from "./components/RouletteWheel";
+import { type Locale, translations } from "./i18n";
 
 export type Item = {
   id: string;
@@ -20,20 +21,34 @@ const COLORS = [
   "#a855f7", // purple
 ];
 
-const DEFAULT_ITEMS: Item[] = [
-  { id: "1", label: "ラーメン" },
-  { id: "2", label: "カレー" },
-  { id: "3", label: "寿司" },
-  { id: "4", label: "焼肉" },
-];
-
 export default function App() {
-  const [items, setItems] = useState<Item[]>(DEFAULT_ITEMS);
+  const [locale, setLocale] = useState<Locale>(
+    navigator.language.startsWith("ja") ? "ja" : "en"
+  );
+  const t = translations[locale];
+
+  const makeDefaultItems = (loc: Locale): Item[] =>
+    translations[loc].defaultItems.map((label, i) => ({
+      id: String(i + 1),
+      label,
+    }));
+
+  const [items, setItems] = useState<Item[]>(() =>
+    makeDefaultItems(navigator.language.startsWith("ja") ? "ja" : "en")
+  );
   const [targetId, setTargetId] = useState<string | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
   const totalRotationRef = useRef(0);
+
+  const switchLocale = (next: Locale) => {
+    if (next === locale) return;
+    setLocale(next);
+    setItems(makeDefaultItems(next));
+    setTargetId(null);
+    setResult(null);
+  };
 
   const addItem = (label: string) => {
     const id = Date.now().toString();
@@ -83,10 +98,26 @@ export default function App() {
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4">
       {/* Header */}
-      <header className="mb-16 text-center">
+      <header className="mb-16 text-center w-full max-w-3xl flex items-center justify-center relative">
         <h1 className="text-4xl font-black text-slate-800 tracking-tight">
-          ルーレット
+          {t.title}
         </h1>
+        {/* Language switcher */}
+        <div className="absolute right-0 flex gap-1">
+          {(["ja", "en"] as Locale[]).map((loc) => (
+            <button
+              key={loc}
+              onClick={() => switchLocale(loc)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+                locale === loc
+                  ? "bg-slate-800 text-white"
+                  : "bg-slate-200 text-slate-500 hover:bg-slate-300"
+              }`}
+            >
+              {loc.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </header>
 
       <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 w-full max-w-3xl">
@@ -118,14 +149,12 @@ export default function App() {
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
             }`}
           >
-            {spinning ? "スピン中…" : "スピン！"}
+            {spinning ? t.spinning : t.spin}
           </button>
 
           {/* Hint messages */}
           {!spinning && items.length < 2 && (
-            <p className="text-xs text-orange-400">
-              項目を2つ以上追加してください
-            </p>
+            <p className="text-xs text-orange-400">{t.needMoreItems}</p>
           )}
         </div>
 
@@ -136,6 +165,7 @@ export default function App() {
             colors={COLORS}
             targetId={targetId}
             spinning={spinning}
+            t={t}
             onAdd={addItem}
             onRemove={removeItem}
             onSetTarget={setTargetId}
@@ -145,24 +175,28 @@ export default function App() {
 
       {/* Explanation — below the fold */}
       <section className="mt-24 w-full max-w-3xl border-t border-slate-200 pt-8 pb-4 text-slate-400 text-sm space-y-2">
-        <h2 className="text-base font-bold text-slate-400">このサービスについて</h2>
-        <h4 className="text-base font-bold">インチキルーレット</h4>
+        <h2 className="text-base font-bold text-slate-400">{t.aboutTitle}</h2>
+        <h4 className="text-base font-bold">{t.aboutHeading}</h4>
         <p>
-          項目リストの <span className="text-yellow-500 font-bold">★</span>{" "}
-          ボタンを押すと、その項目を「確定当たり」として設定できます。
-          スピン後は必ずその項目が選ばれます。
-          そう、お察しの通りこちらのルーレットはインチキルーレットです。自分の案を押し通したい場合にぜひご利用ください。
+          {t.aboutBody.split("★").map((part, i, arr) =>
+            i < arr.length - 1 ? (
+              <span key={i}>
+                {part}
+                <span className="text-yellow-500 font-bold">★</span>
+              </span>
+            ) : (
+              part
+            )
+          )}
         </p>
-        <p>
-          ★ を設定しない場合はランダムに選ばれます。
-        </p>
-        <p>友人などにばれてしまった際は誠心誠意謝罪するか、逃げ切ってください。</p>
+        <p>{t.aboutRandom}</p>
+        <p>{t.aboutApology}</p>
       </section>
 
       {/* Disclaimer */}
       <footer className="w-full max-w-3xl pb-8 text-sm text-slate-400 space-y-2">
-        <h2 className="text-base font-bold text-slate-400">注意事項</h2>
-        ⚠️ 本サービスの利用により生じたいかなる損害についても責任を負いません。
+        <h2 className="text-base font-bold text-slate-400">{t.disclaimerTitle}</h2>
+        ⚠️ {t.disclaimer}
       </footer>
 
       {/* Copyright */}
