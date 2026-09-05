@@ -1,131 +1,167 @@
-type Item = {
-  id: string;
-  label: string;
-};
+import { memo, useMemo } from "react";
+import { SLICE_COLORS, SPIN_DURATION_MS, SPIN_EASING } from "../config";
+import type { Item } from "../types";
 
 type Props = {
   items: Item[];
-  colors: string[];
   rotation: number;
   spinning: boolean;
+  onSpinEnd: () => void;
 };
 
 const SIZE = 320;
-const CX = SIZE / 2;
-const CY = SIZE / 2;
-const R = SIZE / 2 - 12;
+const CENTER = SIZE / 2;
+const RADIUS = SIZE / 2 - 16;
+const INK = "#17111F";
 
 function polarToCartesian(angleDeg: number, radius: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return { x: CX + radius * Math.cos(rad), y: CY + radius * Math.sin(rad) };
+  return {
+    x: CENTER + radius * Math.cos(rad),
+    y: CENTER + radius * Math.sin(rad),
+  };
 }
 
 function describeSlice(startAngle: number, endAngle: number) {
-  const s = polarToCartesian(startAngle, R);
-  const e = polarToCartesian(endAngle, R);
+  const s = polarToCartesian(startAngle, RADIUS);
+  const e = polarToCartesian(endAngle, RADIUS);
   const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-  return `M ${CX} ${CY} L ${s.x} ${s.y} A ${R} ${R} 0 ${largeArc} 1 ${e.x} ${e.y} Z`;
+  return `M ${CENTER} ${CENTER} L ${s.x.toFixed(1)} ${s.y.toFixed(1)} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${e.x.toFixed(1)} ${e.y.toFixed(1)} Z`;
 }
 
-export default function RouletteWheel({ items, colors, rotation, spinning }: Props) {
-  const sliceAngle = items.length > 0 ? 360 / items.length : 360;
-  const maxLabelLen = items.length > 8 ? 5 : items.length > 5 ? 7 : 10;
-  const fontSize = items.length > 8 ? 9 : items.length > 5 ? 11 : 13;
+function truncate(label: string, max: number) {
+  return label.length > max ? `${label.slice(0, max)}…` : label;
+}
+
+function RouletteWheel({ items, rotation, spinning, onSpinEnd }: Props) {
+  const { slices, fontSize } = useMemo(() => {
+    const maxLabelLen = items.length > 8 ? 5 : items.length > 5 ? 7 : 10;
+    const sliceAngle = items.length > 0 ? 360 / items.length : 360;
+
+    return {
+      fontSize: items.length > 8 ? 9 : items.length > 5 ? 11 : 13,
+      slices: items.map((item, i) => {
+        const midAngle = (i + 0.5) * sliceAngle;
+        const pos = polarToCartesian(midAngle, RADIUS * 0.62);
+        return {
+          id: item.id,
+          d: describeSlice(i * sliceAngle, (i + 1) * sliceAngle),
+          fill: SLICE_COLORS[i % SLICE_COLORS.length],
+          label: truncate(item.label, maxLabelLen),
+          x: Number(pos.x.toFixed(1)),
+          y: Number(pos.y.toFixed(1)),
+          // 左半分はそのまま回すと文字が上下逆さまになるため 180 度返す
+          rotate: midAngle > 180 ? midAngle + 90 : midAngle - 90,
+        };
+      }),
+    };
+  }, [items]);
 
   return (
-    <div className="relative select-none">
-      {/* Pointer triangle */}
+    <div className="relative w-[min(320px,78vw)] aspect-square select-none">
+      {/* Pointer */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 z-10"
+        aria-hidden
+        className="absolute left-1/2 top-[-6px] z-10 -translate-x-1/2"
         style={{
           width: 0,
           height: 0,
-          borderLeft: "10px solid transparent",
-          borderRight: "10px solid transparent",
-          borderTop: "22px solid #dc2626",
-          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+          borderLeft: "11px solid transparent",
+          borderRight: "11px solid transparent",
+          borderTop: "26px solid #FF4E63",
+          filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.55))",
         }}
       />
 
-      {/* Wheel */}
+      {/* GPU 合成に乗せるため、SVG ではなくラッパーの div を回す */}
       <div
+        className="h-full w-full"
         style={{
+          willChange: spinning ? "transform" : "auto",
           transform: `rotate(${rotation}deg)`,
           transition: spinning
-            ? "transform 4.5s cubic-bezier(0.15, 0.85, 0.3, 1)"
+            ? `transform ${SPIN_DURATION_MS}ms ${SPIN_EASING}`
             : "none",
+        }}
+        onTransitionEnd={(e) => {
+          if (e.propertyName === "transform") onSpinEnd();
         }}
       >
         <svg
-          width={SIZE}
-          height={SIZE}
-          style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.2))" }}
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          className="h-full w-full"
+          role="presentation"
+          style={{ filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.5))" }}
         >
-          {/* Outer ring */}
-          <circle cx={CX} cy={CY} r={R + 8} fill="#1e293b" />
+          <circle cx={CENTER} cy={CENTER} r={RADIUS + 11} fill="#2A2138" />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={RADIUS + 5}
+            fill="none"
+            stroke="#4C3F62"
+            strokeWidth={1.5}
+          />
 
-          {items.length === 0 && (
-            <circle cx={CX} cy={CY} r={R} fill="#e2e8f0" />
-          )}
+          {slices.length === 0 ? (
+            <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="#2A2138" />
+          ) : null}
 
-          {items.length === 1 && (
+          {slices.length === 1 ? (
             <>
-              <circle cx={CX} cy={CY} r={R} fill={colors[0]} />
+              <circle cx={CENTER} cy={CENTER} r={RADIUS} fill={slices[0].fill} />
               <text
-                x={CX}
-                y={CY}
+                x={CENTER}
+                y={CENTER}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill="white"
-                fontSize={14}
-                fontWeight="bold"
+                fill={INK}
+                fontSize={15}
+                fontWeight="700"
               >
-                {items[0].label.slice(0, maxLabelLen)}
+                {slices[0].label}
               </text>
             </>
-          )}
+          ) : null}
 
-          {items.length >= 2 &&
-            items.map((item, i) => {
-              const startAngle = i * sliceAngle;
-              const endAngle = (i + 1) * sliceAngle;
-              const midAngle = (i + 0.5) * sliceAngle;
-              const labelPos = polarToCartesian(midAngle, R * 0.62);
-              const label =
-                item.label.length > maxLabelLen
-                  ? item.label.slice(0, maxLabelLen) + "…"
-                  : item.label;
-
-              return (
-                <g key={item.id}>
+          {slices.length >= 2
+            ? slices.map((slice) => (
+                <g key={slice.id}>
                   <path
-                    d={describeSlice(startAngle, endAngle)}
-                    fill={colors[i % colors.length]}
-                    stroke="white"
+                    d={slice.d}
+                    fill={slice.fill}
+                    stroke={INK}
                     strokeWidth={2}
                   />
                   <text
-                    x={labelPos.x}
-                    y={labelPos.y}
+                    x={slice.x}
+                    y={slice.y}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fill="white"
+                    fill={INK}
                     fontSize={fontSize}
-                    fontWeight="bold"
-                    transform={`rotate(${midAngle - 90}, ${labelPos.x}, ${labelPos.y})`}
-                    style={{ textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}
+                    fontWeight="700"
+                    transform={`rotate(${slice.rotate.toFixed(1)}, ${slice.x}, ${slice.y})`}
                   >
-                    {label}
+                    {slice.label}
                   </text>
                 </g>
-              );
-            })}
+              ))
+            : null}
 
-          {/* Center cap */}
-          <circle cx={CX} cy={CY} r={18} fill="white" stroke="#e2e8f0" strokeWidth={3} />
-          <circle cx={CX} cy={CY} r={8} fill="#1e293b" />
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={19}
+            fill="#1F1829"
+            stroke="#F5EFE6"
+            strokeWidth={2.5}
+          />
+          <circle cx={CENTER} cy={CENTER} r={6} fill="#F5EFE6" />
         </svg>
       </div>
     </div>
   );
 }
+
+export default memo(RouletteWheel);
