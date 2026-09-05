@@ -3,6 +3,7 @@ export type Locale = "ja" | "en";
 export const translations = {
   ja: {
     localeName: "日本語",
+    localeSuggestion: "日本語版はこちら",
     title: "ルーレット",
     tagline: "迷ったら、まわす。",
     spin: "スピン",
@@ -36,6 +37,7 @@ export const translations = {
   },
   en: {
     localeName: "English",
+    localeSuggestion: "View this page in English",
     title: "Roulette",
     tagline: "Can't decide? Spin.",
     spin: "Spin",
@@ -72,3 +74,19 @@ export const translations = {
 export type T = (typeof translations)[Locale];
 
 export const LOCALES = ["ja", "en"] as const satisfies readonly Locale[];
+
+export const LOCALE_PATHS = {
+  ja: "/",
+  en: "/en/",
+} as const satisfies Record<Locale, string>;
+
+/** 表示言語は URL だけで決まる。クローラが見た HTML と画面が食い違わないための約束。 */
+export function localeFromPath(pathname: string): Locale {
+  return pathname === "/en" || pathname.startsWith("/en/") ? "en" : "ja";
+}
+
+export function preferredLocale(languages: readonly string[]): Locale {
+  return languages.some((lang) => lang.toLowerCase().startsWith("ja"))
+    ? "ja"
+    : "en";
+}
