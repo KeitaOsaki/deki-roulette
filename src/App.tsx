@@ -26,7 +26,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-ink-900 font-sans text-ivory">
       <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8">
-        {suggestedLocale !== null && <LocaleNotice locale={suggestedLocale} />}
+        {suggestedLocale !== null ? (
+          <LocaleNotice locale={suggestedLocale} />
+        ) : null}
 
         <header className="mb-12 flex flex-col-reverse gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>

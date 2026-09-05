@@ -3,6 +3,7 @@ export type Locale = "ja" | "en";
 export const translations = {
   ja: {
     localeName: "日本語",
+    localeSwitchLabel: "言語",
     localeSuggestion: "日本語版はこちら",
     title: "ルーレット",
     tagline: "迷ったら、まわす。",
@@ -37,6 +38,7 @@ export const translations = {
   },
   en: {
     localeName: "English",
+    localeSwitchLabel: "Language",
     localeSuggestion: "View this page in English",
     title: "Roulette",
     tagline: "Can't decide? Spin.",
@@ -85,8 +87,15 @@ export function localeFromPath(pathname: string): Locale {
   return pathname === "/en" || pathname.startsWith("/en/") ? "en" : "ja";
 }
 
+/** `navigator.languages` は優先度順なので、先に見つかった対応言語を採る。
+ *  含まれるかだけを見ると、第 2 言語が第 1 言語を追い越す。 */
 export function preferredLocale(languages: readonly string[]): Locale {
-  return languages.some((lang) => lang.toLowerCase().startsWith("ja"))
-    ? "ja"
-    : "en";
+  for (const tag of languages) {
+    const lower = tag.toLowerCase();
+    const match = LOCALES.find(
+      (loc) => lower === loc || lower.startsWith(`${loc}-`)
+    );
+    if (match !== undefined) return match;
+  }
+  return "en";
 }
