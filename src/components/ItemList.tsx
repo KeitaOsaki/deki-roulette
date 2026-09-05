@@ -43,10 +43,12 @@ function ItemRow({
         showMark ? "border-ink-500" : "border-ink-700"
       }`}
     >
+      {/* 印を伏せている間は aria-pressed も落とす。残すと DOM と
+          アクセシビリティツリーに指定先が出たままになる。 */}
       <button
         type="button"
         {...longPress}
-        aria-pressed={isTarget}
+        aria-pressed={showMark ? isTarget : undefined}
         className="no-callout flex min-w-0 flex-1 select-none items-center gap-2.5 rounded-xl py-2 pl-3 text-left"
       >
         {/* 指定中は塗りを抜いてリングにする。位置も大きさも変えないので、
