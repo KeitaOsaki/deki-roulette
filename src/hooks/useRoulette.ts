@@ -39,7 +39,6 @@ export function useRoulette(
   const rotationRef = useRef(0);
   const pendingResultRef = useRef<string | null>(null);
   const timerRef = useRef<number | undefined>(undefined);
-  const untouchedRef = useRef(true);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== undefined) {
@@ -53,7 +52,6 @@ export function useRoulette(
   const addItem = useCallback((raw: string) => {
     const label = normalizeLabel(raw);
     if (!label) return;
-    untouchedRef.current = false;
     setItems((prev) =>
       prev.length >= MAX_ITEMS ? prev : [...prev, { id: createId(), label }]
     );
@@ -61,7 +59,6 @@ export function useRoulette(
   }, []);
 
   const removeItem = useCallback((id: string) => {
-    untouchedRef.current = false;
     setItems((prev) => prev.filter((item) => item.id !== id));
     setTargetId((prev) => (prev === id ? null : prev));
     setResult(null);
@@ -69,14 +66,6 @@ export function useRoulette(
 
   const toggleTarget = useCallback((id: string) => {
     setTargetId((prev) => (prev === id ? null : id));
-    setResult(null);
-  }, []);
-
-  /** 項目がまだ既定値のままなら、言語切替に追随して翻訳版に差し替える。 */
-  const retranslateItems = useCallback((labels: readonly string[]) => {
-    if (!untouchedRef.current || pendingResultRef.current !== null) return;
-    setItems(makeItems(labels));
-    setTargetId(null);
     setResult(null);
   }, []);
 
@@ -134,7 +123,6 @@ export function useRoulette(
     addItem,
     removeItem,
     toggleTarget,
-    retranslateItems,
     spin,
     finishSpin,
   };

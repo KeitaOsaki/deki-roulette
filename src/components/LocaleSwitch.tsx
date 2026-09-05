@@ -1,23 +1,25 @@
 import { memo } from "react";
-import { LOCALES, translations, type Locale } from "../i18n";
+import { LOCALES, LOCALE_PATHS, translations, type Locale } from "../i18n";
 
 type Props = {
   locale: Locale;
-  onChange: (next: Locale) => void;
 };
 
-function LocaleSwitch({ locale, onChange }: Props) {
+function LocaleSwitch({ locale }: Props) {
   return (
-    <div className="flex shrink-0 gap-1 rounded-full border border-ink-700 bg-ink-800 p-1">
+    <nav
+      aria-label={translations[locale].localeSwitchLabel}
+      className="flex shrink-0 gap-1 rounded-full border border-ink-700 bg-ink-800 p-1"
+    >
       {LOCALES.map((loc) => {
         const active = loc === locale;
         return (
-          <button
+          <a
             key={loc}
-            type="button"
+            href={LOCALE_PATHS[loc]}
+            hrefLang={loc}
             lang={loc}
-            aria-pressed={active}
-            onClick={() => onChange(loc)}
+            aria-current={active ? "page" : undefined}
             className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
               active
                 ? "bg-ivory text-ink-900"
@@ -25,10 +27,10 @@ function LocaleSwitch({ locale, onChange }: Props) {
             }`}
           >
             {translations[loc].localeName}
-          </button>
+          </a>
         );
       })}
-    </div>
+    </nav>
   );
 }
 

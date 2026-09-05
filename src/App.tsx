@@ -1,38 +1,35 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import ItemList from "./components/ItemList";
+import LocaleNotice from "./components/LocaleNotice";
 import LocaleSwitch from "./components/LocaleSwitch";
 import RouletteWheel from "./components/RouletteWheel";
-import { detectLocale, useLocale } from "./hooks/useLocale";
+import { useLocaleSuggestion } from "./hooks/useLocaleSuggestion";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { makeItems, useRoulette } from "./hooks/useRoulette";
-import { translations, type Locale } from "./i18n";
+import { localeFromPath, translations } from "./i18n";
 
 const SUMMARY_CLASS =
   "flex cursor-pointer list-none items-center gap-2 text-base font-bold text-ivory before:text-muted before:transition-transform before:content-['▸'] group-open:before:rotate-90 [&::-webkit-details-marker]:hidden";
 
 export default function App() {
-  const { locale, setLocale } = useLocale();
+  const locale = localeFromPath(window.location.pathname);
+  const suggestedLocale = useLocaleSuggestion(locale);
   const reducedMotion = useReducedMotion();
   const t = translations[locale];
   const [helpOpen, setHelpOpen] = useState(false);
 
   const roulette = useRoulette(
-    () => makeItems(translations[detectLocale()].defaultItems),
+    () => makeItems(translations[locale].defaultItems),
     reducedMotion
-  );
-  const { retranslateItems } = roulette;
-
-  const switchLocale = useCallback(
-    (next: Locale) => {
-      setLocale(next);
-      retranslateItems(translations[next].defaultItems);
-    },
-    [retranslateItems, setLocale]
   );
 
   return (
     <div className="min-h-screen bg-ink-900 font-sans text-ivory">
       <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8">
+        {suggestedLocale !== null ? (
+          <LocaleNotice locale={suggestedLocale} />
+        ) : null}
+
         <header className="mb-12 flex flex-col-reverse gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
             <h1 className="text-[2.1rem] font-black leading-none tracking-[-0.035em] sm:text-[2.6rem]">
@@ -41,7 +38,7 @@ export default function App() {
             <p className="mt-2.5 text-balance text-sm text-muted">{t.tagline}</p>
           </div>
           <div className="flex justify-end">
-            <LocaleSwitch locale={locale} onChange={switchLocale} />
+            <LocaleSwitch locale={locale} />
           </div>
         </header>
 
