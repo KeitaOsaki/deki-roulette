@@ -1,206 +1,128 @@
-import { useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import ItemList from "./components/ItemList";
+import LocaleSwitch from "./components/LocaleSwitch";
 import RouletteWheel from "./components/RouletteWheel";
-import { type Locale, translations } from "./i18n";
+import { detectLocale, useLocale } from "./hooks/useLocale";
+import { useReducedMotion } from "./hooks/useReducedMotion";
+import { makeItems, useRoulette } from "./hooks/useRoulette";
+import { translations, type Locale } from "./i18n";
 
-export type Item = {
-  id: string;
-  label: string;
-};
-
-const COLORS = [
-  "#ef4444", // red
-  "#3b82f6", // blue
-  "#22c55e", // green
-  "#f59e0b", // amber
-  "#8b5cf6", // violet
-  "#ec4899", // pink
-  "#06b6d4", // cyan
-  "#f97316", // orange
-  "#14b8a6", // teal
-  "#a855f7", // purple
-];
+const SUMMARY_CLASS =
+  "flex cursor-pointer list-none items-center gap-2 text-base font-bold text-ivory before:text-muted before:transition-transform before:content-['▸'] group-open:before:rotate-90 [&::-webkit-details-marker]:hidden";
 
 export default function App() {
-  const [locale, setLocale] = useState<Locale>(
-    navigator.language.startsWith("ja") ? "ja" : "en"
-  );
+  const { locale, setLocale } = useLocale();
+  const reducedMotion = useReducedMotion();
   const t = translations[locale];
+  const [helpOpen, setHelpOpen] = useState(false);
 
-  const makeDefaultItems = (loc: Locale): Item[] =>
-    translations[loc].defaultItems.map((label, i) => ({
-      id: String(i + 1),
-      label,
-    }));
-
-  const [items, setItems] = useState<Item[]>(() =>
-    makeDefaultItems(navigator.language.startsWith("ja") ? "ja" : "en")
+  const roulette = useRoulette(
+    () => makeItems(translations[detectLocale()].defaultItems),
+    reducedMotion
   );
-  const [targetId, setTargetId] = useState<string | null>(null);
-  const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
-  const [rotation, setRotation] = useState(0);
-  const totalRotationRef = useRef(0);
+  const { retranslateItems } = roulette;
 
-  const switchLocale = (next: Locale) => {
-    if (next === locale) return;
-    setLocale(next);
-    setItems(makeDefaultItems(next));
-    setTargetId(null);
-    setResult(null);
-  };
-
-  const addItem = (label: string) => {
-    const id = Date.now().toString();
-    setItems((prev) => [...prev, { id, label }]);
-    setResult(null);
-  };
-
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    if (targetId === id) setTargetId(null);
-    setResult(null);
-  };
-
-  const spin = () => {
-    if (spinning || items.length < 2) return;
-
-    const targetIndex =
-      targetId !== null
-        ? items.findIndex((item) => item.id === targetId)
-        : Math.floor(Math.random() * items.length);
-    if (targetIndex === -1) return;
-
-    const sliceAngle = 360 / items.length;
-
-    // Element angle at pointer = (360 - R) % 360, so to land on rawAngle we need R = (360 - rawAngle) % 360
-    const rawAngle = targetIndex * sliceAngle + Math.random() * sliceAngle;
-    const desiredMod = (360 - rawAngle) % 360;
-    const currentMod = ((totalRotationRef.current % 360) + 360) % 360;
-    let delta = (desiredMod - currentMod + 360) % 360;
-    if (delta < 10) delta += 360;
-
-    const fullSpins = 4 + Math.floor(Math.random() * 5); // 4〜8周
-    const newTotal = totalRotationRef.current + fullSpins * 360 + delta;
-    totalRotationRef.current = newTotal;
-    setRotation(newTotal);
-    setSpinning(true);
-    setResult(null);
-
-    setTimeout(() => {
-      setSpinning(false);
-      setResult(items[targetIndex].label);
-    }, 4600);
-  };
-
-  const canSpin = !spinning && items.length >= 2;
+  const switchLocale = useCallback(
+    (next: Locale) => {
+      setLocale(next);
+      retranslateItems(translations[next].defaultItems);
+    },
+    [retranslateItems, setLocale]
+  );
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4">
-      {/* Header */}
-      <header className="mb-16 text-center w-full max-w-3xl flex items-center justify-center relative">
-        <h1 className="text-4xl font-black text-slate-800 tracking-tight">
-          {t.title}
-        </h1>
-        {/* Language switcher */}
-        <div className="absolute right-0 flex gap-1">
-          {(["ja", "en"] as Locale[]).map((loc) => (
-            <button
-              key={loc}
-              onClick={() => switchLocale(loc)}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                locale === loc
-                  ? "bg-slate-800 text-white"
-                  : "bg-slate-200 text-slate-500 hover:bg-slate-300"
-              }`}
+    <div className="min-h-screen bg-ink-900 font-sans text-ivory">
+      <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8">
+        <header className="mb-12 flex flex-col-reverse gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div>
+            <h1 className="text-[2.1rem] font-black leading-none tracking-[-0.035em] sm:text-[2.6rem]">
+              {t.title}
+            </h1>
+            <p className="mt-2.5 text-balance text-sm text-muted">{t.tagline}</p>
+          </div>
+          <div className="flex justify-end">
+            <LocaleSwitch locale={locale} onChange={switchLocale} />
+          </div>
+        </header>
+
+        <div className="flex flex-col items-center gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+          <div className="flex flex-col items-center gap-6">
+            <RouletteWheel
+              items={roulette.items}
+              rotation={roulette.rotation}
+              spinning={roulette.spinning}
+              onSpinEnd={roulette.finishSpin}
+            />
+
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex h-14 items-center justify-center text-center"
             >
-              {loc.toUpperCase()}
+              {roulette.result !== null ? (
+                <span className="animate-reveal rounded-2xl border border-gold/60 bg-gold/10 px-6 py-3 text-xl font-black text-gold">
+                  {roulette.result}
+                </span>
+              ) : (
+                <span className="text-xs text-muted">
+                  {roulette.spinning ? t.spinning : t.resultPlaceholder}
+                </span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={roulette.spin}
+              disabled={!roulette.canSpin}
+              aria-busy={roulette.spinning}
+              className="rounded-full bg-flare px-12 py-3.5 text-lg font-black tracking-wide text-ink-900 shadow-[0_8px_28px_-8px_#FF4E63] transition-transform hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-muted disabled:shadow-none"
+            >
+              {roulette.spinning ? t.spinning : t.spin}
             </button>
-          ))}
-        </div>
-      </header>
-
-      <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 w-full max-w-3xl">
-        {/* Left: wheel + spin */}
-        <div className="flex flex-col items-center gap-5">
-          <RouletteWheel
-            items={items}
-            colors={COLORS}
-            rotation={rotation}
-            spinning={spinning}
-          />
-
-          {/* Result */}
-          <div className="h-14 flex items-center justify-center">
-            {result && (
-              <div className="px-6 py-3 bg-white rounded-2xl shadow-lg border-2 border-yellow-300 text-xl font-bold text-slate-800 animate-bounce">
-                🎉 {result}
-              </div>
-            )}
           </div>
 
-          {/* Spin button */}
-          <button
-            onClick={spin}
-            disabled={!canSpin}
-            className={`px-10 py-3.5 rounded-full text-lg font-black shadow-lg transition-all ${
-              canSpin
-                ? "bg-red-500 hover:bg-red-600 active:scale-95 text-white shadow-red-200"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed"
-            }`}
-          >
-            {spinning ? t.spinning : t.spin}
-          </button>
-
-          {/* Hint messages */}
-          {!spinning && items.length < 2 && (
-            <p className="text-xs text-orange-400">{t.needMoreItems}</p>
-          )}
-        </div>
-
-        {/* Right: item list */}
-        <div className="w-full lg:w-auto">
           <ItemList
-            items={items}
-            colors={COLORS}
-            targetId={targetId}
-            spinning={spinning}
+            items={roulette.items}
+            targetId={roulette.targetId}
+            spinning={roulette.spinning}
+            atCapacity={roulette.atCapacity}
             t={t}
-            onAdd={addItem}
-            onRemove={removeItem}
-            onSetTarget={setTargetId}
+            onAdd={roulette.addItem}
+            onRemove={roulette.removeItem}
+            onToggleTarget={roulette.toggleTarget}
           />
         </div>
+
+        <footer className="mt-16 border-t border-ink-700 pt-8 text-sm leading-relaxed text-muted sm:mt-24">
+          {/* スピンした瞬間に畳む。人前で回すときに開きっぱなしを踏まないための保険 */}
+          <details
+            className="group"
+            open={helpOpen && !roulette.spinning}
+            onToggle={(e) => setHelpOpen(e.currentTarget.open)}
+          >
+            <summary className={SUMMARY_CLASS}>{t.helpTitle}</summary>
+            <div className="mt-3 max-w-[62ch] space-y-2.5 pl-5">
+              <p>{t.helpBasic}</p>
+              <h3 className="pt-2 font-bold text-ivory">{t.helpAimTitle}</h3>
+              <p>{t.helpAim}</p>
+              <p>{t.helpAimStealth}</p>
+              <p>{t.helpAimRandom}</p>
+            </div>
+          </details>
+
+          <details className="group mt-5">
+            <summary className={SUMMARY_CLASS}>{t.useCasesTitle}</summary>
+            <p className="mt-3 max-w-[62ch] pl-5">{t.useCases}</p>
+          </details>
+
+          <details className="group mt-5">
+            <summary className={SUMMARY_CLASS}>{t.noticeTitle}</summary>
+            <p className="mt-3 max-w-[62ch] pl-5">{t.notice}</p>
+          </details>
+
+          <p className="mt-10 pb-2 text-xs text-muted">&copy; 2026 basekeita</p>
+        </footer>
       </div>
-
-      {/* Explanation — below the fold */}
-      <section className="mt-24 w-full max-w-3xl border-t border-slate-200 pt-8 pb-4 text-slate-400 text-sm space-y-2">
-        <h2 className="text-base font-bold text-slate-400">{t.aboutTitle}</h2>
-        <h4 className="text-base font-bold">{t.aboutHeading}</h4>
-        <p>
-          {t.aboutBody.split("★").map((part, i, arr) =>
-            i < arr.length - 1 ? (
-              <span key={i}>
-                {part}
-                <span className="text-yellow-500 font-bold">★</span>
-              </span>
-            ) : (
-              part
-            )
-          )}
-        </p>
-        <p>{t.aboutRandom}</p>
-        <p>{t.aboutApology}</p>
-      </section>
-
-      {/* Disclaimer */}
-      <footer className="w-full max-w-3xl pb-8 text-sm text-slate-400 space-y-2">
-        <h2 className="text-base font-bold text-slate-400">{t.disclaimerTitle}</h2>
-        ⚠️ {t.disclaimer}
-      </footer>
-
-      {/* Copyright */}
-      <p className="pb-6 text-xs text-slate-500">&copy; 2026 basekeita</p>
-    </main>
+    </div>
   );
 }
