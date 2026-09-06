@@ -5,7 +5,7 @@ export const translations = {
     localeName: "日本語",
     localeSwitchLabel: "言語",
     localeSuggestion: "日本語版はこちら",
-    title: "ルーレット",
+    title: "デキレーレット",
     tagline: "迷ったら、まわす。",
     spin: "スピン",
     spinning: "スピン中…",
