@@ -6,13 +6,17 @@ import RouletteWheel from "./components/RouletteWheel";
 import { useLocaleSuggestion } from "./hooks/useLocaleSuggestion";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { makeItems, useRoulette } from "./hooks/useRoulette";
-import { localeFromPath, translations } from "./i18n";
+import { translations, type Locale } from "./i18n";
 
 const SUMMARY_CLASS =
   "flex cursor-pointer list-none items-center gap-2 text-base font-bold text-ivory before:text-muted before:transition-transform before:content-['▸'] group-open:before:rotate-90 [&::-webkit-details-marker]:hidden";
 
-export default function App() {
-  const locale = localeFromPath(window.location.pathname);
+type Props = {
+  /** URL から決まる表示言語。プリレンダ時は window を読めないので外から渡す。 */
+  locale: Locale;
+};
+
+export default function App({ locale }: Props) {
   const suggestedLocale = useLocaleSuggestion(locale);
   const reducedMotion = useReducedMotion();
   const t = translations[locale];
