@@ -1,13 +1,22 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import { localeFromPath } from "./i18n";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("Root element #root not found");
 
-createRoot(container).render(
+const app = (
   <StrictMode>
-    <App />
+    <App locale={localeFromPath(window.location.pathname)} />
   </StrictMode>
 );
+
+// dev サーバは #root が空のまま配信される。プリレンダ済みの本番ビルドとで
+// 入り口が変わるので、中身の有無で hydrate と初回描画を選び分ける。
+if (container.hasChildNodes()) {
+  hydrateRoot(container, app);
+} else {
+  createRoot(container).render(app);
+}

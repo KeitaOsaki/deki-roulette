@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm run dev       # 開発サーバ起動 (http://localhost:5173)
-npm run build     # 本番ビルド (tsc + vite build)
+npm run build     # 本番ビルド (tsc + クライアント + SSR バンドル + プリレンダ)
 npm run preview   # ビルド結果のプレビュー (http://localhost:4173)
 npm run lint      # ESLint 実行
 ```
@@ -25,7 +25,10 @@ npm run lint      # ESLint 実行
 - `src/hooks/useLongPress.ts` — 長押しでのみ発火するハンドラ束。
 - `src/hooks/useLocaleSuggestion.ts` — ブラウザの言語と表示中の言語のずれの検出。
 - `src/hooks/useReducedMotion.ts` — `prefers-reduced-motion` の購読。
-- `src/App.tsx` — フックとコンポーネントの組み立てのみ。
+- `src/App.tsx` — フックとコンポーネントの組み立てのみ。表示言語は `locale` prop で受け取る。
+- `src/main.tsx` — クライアントの入り口。`#root` の中身の有無で hydrate と初回描画を選ぶ。
+- `src/entry-server.tsx` — プリレンダ用に `App` を文字列へ描画する。
+- `scripts/prerender.mjs` — ビルド後に各エントリ HTML の `#root` へ描画結果を差し込む。
 - `src/components/RouletteWheel.tsx` — SVG 描画。回転は CSS `transform` トランジション。
 - `src/components/ItemList.tsx` — 項目の追加・削除・ターゲット指定 UI と、印の表示制御。
 - `src/components/LocaleSwitch.tsx` — 言語別 URL へのリンク。
@@ -43,6 +46,21 @@ npm run lint      # ESLint 実行
 - ターゲット指定は項目の長押し（`LONG_PRESS_MS`）のみ。専用ボタンやツールチップは置かない。単純クリックでは何も起きない。キーボードは OS のキーリピート（`KeyboardEvent.repeat`）を拾う。
 - 指定中の印はカラードットを塗りからリングに変えるだけ。リストにポインタ／フォーカスがある間と指定直後 `TARGET_HINT_MS` の間しか出さず、スピン中と結果表示中は必ず伏せる。
 - 隠し操作の説明はフッターの折りたたみ内にのみ置き、スピン開始で自動的に閉じる。
+
+### プリレンダリング
+
+クローラに本文を渡すため、ビルド時に React を静的 HTML へ焼き込んで `#root` に入れてある。
+JS が動く前から画面のテキストがすべて HTML にある。
+
+- `npm run build` は クライアントビルド → SSR バンドル (`dist-ssr/`) → `scripts/prerender.mjs` の順。
+- `BUILD_TARGET=ssr` のときは `vite.config.ts` が `cloudflare()` を外す。SSR バンドルは Node で実行するため。
+- 表示言語を `window.location.pathname` から読むと SSR で落ちるので、`App` は `locale` を prop で受け取る。
+  URL が唯一のソースである点は変わらない (`main.tsx` が `localeFromPath` を呼ぶ)。
+- 焼き込むのは画面に出ている文言だけ。ステルス仕様のとおり `details` は閉じたまま、
+  指定中の印 (`aria-pressed`) も出力に含まれない。
+- 誘導リンク (`LocaleNotice`) は閲覧者ごとに変わるので、静的 HTML には出さずマウント後に描画する。
+- ブラウザ API を初回描画で触るフックを足すときは、SSR 側の初期値を用意する
+  (`useReducedMotion` の `getServerSnapshot` が例)。
 
 ### 言語別 URL
 
