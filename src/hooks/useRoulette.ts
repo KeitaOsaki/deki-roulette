@@ -1,28 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   MAX_ITEMS,
-  MAX_LABEL_LENGTH,
   MIN_ITEMS,
   REDUCED_MOTION_SPIN_MS,
   SPIN_FALLBACK_MS,
 } from "../config";
+import { createId, normalizeLabel } from "../items";
 import type { Item } from "../types";
-
-function createId() {
-  // randomUUID は secure context 限定なので、http 経由のプレビュー用に退避先を持つ
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function normalizeLabel(raw: string) {
-  return raw.replace(/\s+/g, " ").trim().slice(0, MAX_LABEL_LENGTH);
-}
-
-export function makeItems(labels: readonly string[]): Item[] {
-  return labels.map((label) => ({ id: createId(), label }));
-}
 
 export function useRoulette(
   createInitialItems: () => Item[],

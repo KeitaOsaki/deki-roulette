@@ -34,6 +34,31 @@ export const translations = {
     noticeTitle: "注意事項",
     notice:
       "本サービスの利用により生じたいかなる損害についても責任を負いません。",
+    orderNavLabel: "順番決め",
+    rouletteNavLabel: "ルーレット",
+    orderTitle: "順番決め",
+    orderTagline: "並び順は、ひと振りで。",
+    orderShuffle: "並べ替え",
+    orderShuffling: "並べ替え中…",
+    orderResultPlaceholder: "並べ替えると、ここに順番が出ます",
+    orderResultTitle: "結果",
+    orderRankAriaLabel: (rank: number) => `${rank} 番目`,
+    orderCopy: "結果をコピー",
+    orderCopied: "コピーしました",
+    orderMarkFirst: "先頭",
+    orderMarkLast: "末尾",
+    orderHelpBasic:
+      "項目を追加して並べ替えを押すだけです。項目は 2 個から 24 個まで登録できます。",
+    orderHelpAimTitle: "位置を決めておきたいとき",
+    orderHelpAim:
+      "項目を 0.6 秒ほど長押しすると、先頭 → 末尾 → 解除の順に切り替わります。先頭と末尾はそれぞれ 1 項目までで、別の項目に付け替えると前の指定は外れます。キーボードの場合は項目にフォーカスして Enter を押しっぱなしにしてください。",
+    orderHelpAimStealth:
+      "指定した印は、リストにカーソルを乗せている間だけ出ます。並べ替え中と結果表示中は消え、この説明も並べ替えを押すと自動で閉じます。",
+    orderHelpAimRandom:
+      "指定した項目以外の並びは常にランダムです。何も指定しなければ、順番は本当にランダムです。",
+    orderUseCases:
+      "発表やプレゼンの順番決め、幹事の持ち回り、掃除当番の割り当て、チーム内のレビュー担当、席替え、くじ引きの代わりに。登録もインストールも不要で、スマホからも PC からも無料で使えます。",
+    orderDefaultItems: ["A チーム", "B チーム", "C チーム", "D チーム"],
     defaultItems: ["ラーメン", "カレー", "寿司", "焼肉"],
   },
   en: {
@@ -50,7 +75,7 @@ export const translations = {
     addPlaceholder: "Add an item",
     addButton: "Add",
     emptyList: "Add an item to get started",
-    needMoreItems: "Add at least 2 items to spin",
+    needMoreItems: "Add at least 2 items",
     atCapacity: (max: number) => `You can add up to ${max} items`,
     itemCount: (count: number, max: number) => `${count} / ${max}`,
     removeAriaLabel: (label: string) => `Remove ${label}`,
@@ -69,6 +94,31 @@ export const translations = {
     noticeTitle: "Disclaimer",
     notice:
       "We are not responsible for any damages arising from the use of this service.",
+    orderNavLabel: "Random order",
+    rouletteNavLabel: "Roulette",
+    orderTitle: "Random Order",
+    orderTagline: "One shuffle settles the running order.",
+    orderShuffle: "Shuffle",
+    orderShuffling: "Shuffling…",
+    orderResultPlaceholder: "Shuffle to see the running order",
+    orderResultTitle: "Result",
+    orderRankAriaLabel: (rank: number) => `Position ${rank}`,
+    orderCopy: "Copy result",
+    orderCopied: "Copied",
+    orderMarkFirst: "First",
+    orderMarkLast: "Last",
+    orderHelpBasic:
+      "Add your entries and press Shuffle. You can register between 2 and 24 items.",
+    orderHelpAimTitle: "When a position is already decided",
+    orderHelpAim:
+      "Press and hold an item for about 0.6 seconds to cycle it through first, last, and off. Only one item can hold each position, so marking another one clears the previous mark. With a keyboard, focus the item and hold Enter.",
+    orderHelpAimStealth:
+      "The mark only appears while your cursor is over the list. It disappears while shuffling and while the result is up, and this section closes itself the moment you press Shuffle.",
+    orderHelpAimRandom:
+      "Everything you have not marked is always shuffled at random. With nothing marked, the order really is random.",
+    orderUseCases:
+      "Setting the running order for talks and demos, rotating who hosts, assigning chores or reviews, rearranging seats, or standing in for drawing lots. No sign-up, no install — free on phone and desktop.",
+    orderDefaultItems: ["Team A", "Team B", "Team C", "Team D"],
     defaultItems: ["Pizza", "Burger", "Sushi", "Tacos"],
   },
 } as const;
@@ -77,14 +127,24 @@ export type T = (typeof translations)[Locale];
 
 export const LOCALES = ["ja", "en"] as const satisfies readonly Locale[];
 
-export const LOCALE_PATHS = {
-  ja: "/",
-  en: "/en/",
-} as const satisfies Record<Locale, string>;
+export const PAGES = ["roulette", "order"] as const;
+
+export type Page = (typeof PAGES)[number];
+
+/** 言語とページから URL への唯一の対応表。リンク先はすべてここから引く。 */
+export const PAGE_PATHS = {
+  roulette: { ja: "/", en: "/en/" },
+  order: { ja: "/order/", en: "/en/order/" },
+} as const satisfies Record<Page, Record<Locale, string>>;
 
 /** 表示言語は URL だけで決まる。クローラが見た HTML と画面が食い違わないための約束。 */
 export function localeFromPath(pathname: string): Locale {
   return pathname === "/en" || pathname.startsWith("/en/") ? "en" : "ja";
+}
+
+/** 表示するページも同じく URL だけで決まる。 */
+export function pageFromPath(pathname: string): Page {
+  return /^\/(en\/)?order\/?$/.test(pathname) ? "order" : "roulette";
 }
 
 /** `navigator.languages` は優先度順なので、先に見つかった対応言語を採る。

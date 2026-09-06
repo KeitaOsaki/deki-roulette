@@ -29,3 +29,15 @@ export const LONG_PRESS_MS = 600;
 
 /** 指定直後だけ印を見せる時間。以降はリストに触れない限り痕跡を残さない。 */
 export const TARGET_HINT_MS = 1600;
+
+/** 順番の結果を 1 件ずつ出すときの間隔。 */
+export const ORDER_REVEAL_STEP_MS = 160;
+
+/** tailwind.config.ts の animation.reveal と同じ長さ。演出の終了時刻の計算に使う。 */
+export const REVEAL_ANIM_MS = 360;
+
+/** prefers-reduced-motion のときは 1 件ずつ出さないので、演出はこの時間で終わる。 */
+export const REDUCED_MOTION_REVEAL_MS = 200;
+
+/** コピーできたことを伝える表示を出しておく時間。 */
+export const COPY_FEEDBACK_MS = 1800;

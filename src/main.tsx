@@ -2,14 +2,16 @@ import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { localeFromPath } from "./i18n";
+import { localeFromPath, pageFromPath } from "./i18n";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("Root element #root not found");
 
+const { pathname } = window.location;
+
 const app = (
   <StrictMode>
-    <App locale={localeFromPath(window.location.pathname)} />
+    <App locale={localeFromPath(pathname)} page={pageFromPath(pathname)} />
   </StrictMode>
 );
 
