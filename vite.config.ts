@@ -26,6 +26,8 @@ export default defineConfig({
           input: {
             ja: resolve(__dirname, "index.html"),
             en: resolve(__dirname, "en/index.html"),
+            jaOrder: resolve(__dirname, "order/index.html"),
+            enOrder: resolve(__dirname, "en/order/index.html"),
           },
         },
       },

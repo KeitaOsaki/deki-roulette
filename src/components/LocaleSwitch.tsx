@@ -1,11 +1,18 @@
 import { memo } from "react";
-import { LOCALES, LOCALE_PATHS, translations, type Locale } from "../i18n";
+import {
+  LOCALES,
+  PAGE_PATHS,
+  translations,
+  type Locale,
+  type Page,
+} from "../i18n";
 
 type Props = {
   locale: Locale;
+  page: Page;
 };
 
-function LocaleSwitch({ locale }: Props) {
+function LocaleSwitch({ locale, page }: Props) {
   return (
     <nav
       aria-label={translations[locale].localeSwitchLabel}
@@ -16,7 +23,7 @@ function LocaleSwitch({ locale }: Props) {
         return (
           <a
             key={loc}
-            href={LOCALE_PATHS[loc]}
+            href={PAGE_PATHS[page][loc]}
             hrefLang={loc}
             lang={loc}
             aria-current={active ? "page" : undefined}

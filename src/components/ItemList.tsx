@@ -8,14 +8,30 @@ import {
 } from "../config";
 import { useLongPress } from "../hooks/useLongPress";
 import type { T } from "../i18n";
-import type { Item } from "../types";
+import type { Item, Mark, Marks } from "../types";
+
+/** 指定中は塗りを抜いてリングにする。位置も大きさも変えないので、
+ *  気づいていない人にはただの色見本のままに見える。
+ *  末尾指定だけは中心にも点を置いて先頭と見分けられるようにする。 */
+function markStyle(mark: Mark | undefined, color: string) {
+  if (mark === undefined) return { backgroundColor: color };
+  const ring = { boxShadow: `inset 0 0 0 2px ${color}` };
+  if (mark === "last") {
+    return {
+      ...ring,
+      backgroundImage: `radial-gradient(circle, ${color} 0 2px, transparent 2px)`,
+    };
+  }
+  return ring;
+}
 
 type RowProps = {
   item: Item;
   color: string;
-  isTarget: boolean;
+  mark: Mark | undefined;
+  markLabel: string | undefined;
   showMark: boolean;
-  spinning: boolean;
+  busy: boolean;
   removeAriaLabel: string;
   onLongPress: (id: string) => void;
   onRemove: (id: string) => void;
@@ -24,9 +40,10 @@ type RowProps = {
 function ItemRow({
   item,
   color,
-  isTarget,
+  mark,
+  markLabel,
   showMark,
-  spinning,
+  busy,
   removeAriaLabel,
   onLongPress,
   onRemove,
@@ -35,7 +52,7 @@ function ItemRow({
     () => onLongPress(item.id),
     [item.id, onLongPress]
   );
-  const longPress = useLongPress(handleLongPress, spinning);
+  const longPress = useLongPress(handleLongPress, busy);
 
   return (
     <li
@@ -48,26 +65,23 @@ function ItemRow({
       <button
         type="button"
         {...longPress}
-        aria-pressed={showMark ? isTarget : undefined}
+        aria-pressed={showMark ? true : undefined}
         className="no-callout flex min-w-0 flex-1 select-none items-center gap-2.5 rounded-xl py-2 pl-3 text-left"
       >
-        {/* 指定中は塗りを抜いてリングにする。位置も大きさも変えないので、
-            気づいていない人にはただの色見本のままに見える。 */}
         <span
           aria-hidden
           className="h-3 w-3 shrink-0 rounded-full transition-[background-color,box-shadow] duration-150"
-          style={
-            showMark
-              ? { boxShadow: `inset 0 0 0 2px ${color}` }
-              : { backgroundColor: color }
-          }
+          style={markStyle(showMark ? mark : undefined, color)}
         />
         <span className="truncate text-sm text-ivory">{item.label}</span>
+        {showMark && markLabel !== undefined ? (
+          <span className="sr-only">{markLabel}</span>
+        ) : null}
       </button>
       <button
         type="button"
         onClick={() => onRemove(item.id)}
-        disabled={spinning}
+        disabled={busy}
         aria-label={removeAriaLabel}
         className="shrink-0 rounded px-1 py-2 text-sm leading-none text-ink-400 transition-colors hover:text-flare disabled:cursor-not-allowed"
       >
@@ -81,24 +95,28 @@ const MemoItemRow = memo(ItemRow);
 
 type Props = {
   items: Item[];
-  targetId: string | null;
-  spinning: boolean;
+  marks: Marks;
+  /** 演出中。入力と隠しジェスチャを止める。 */
+  busy: boolean;
+  /** 印を無条件に伏せる。演出中と結果表示中に立てる。 */
+  concealMarks: boolean;
   atCapacity: boolean;
   t: T;
   onAdd: (label: string) => void;
   onRemove: (id: string) => void;
-  onToggleTarget: (id: string) => void;
+  onLongPress: (id: string) => void;
 };
 
 function ItemList({
   items,
-  targetId,
-  spinning,
+  marks,
+  busy,
+  concealMarks,
   atCapacity,
   t,
   onAdd,
   onRemove,
-  onToggleTarget,
+  onLongPress,
 }: Props) {
   const [input, setInput] = useState("");
   const [listActive, setListActive] = useState(false);
@@ -106,17 +124,17 @@ function ItemList({
   const hintTimerRef = useRef<number | undefined>(undefined);
 
   const trimmed = input.trim();
-  const inputDisabled = spinning || atCapacity;
+  const inputDisabled = busy || atCapacity;
 
-  // 指定した本人だけが結果を確認できればよいので、印はリストに触れている間と
-  // 指定直後だけ出す。スピン中は無条件で伏せる。
-  const revealTarget = !spinning && (listActive || hinting);
+  // 指定した本人だけが確認できればよいので、印はリストに触れている間と
+  // 指定直後だけ出す。演出中と結果表示中は無条件で伏せる。
+  const revealMarks = !concealMarks && (listActive || hinting);
 
   useEffect(() => () => clearTimeout(hintTimerRef.current), []);
 
   const handleLongPress = useCallback(
     (id: string) => {
-      onToggleTarget(id);
+      onLongPress(id);
       setHinting(true);
       clearTimeout(hintTimerRef.current);
       hintTimerRef.current = window.setTimeout(
@@ -124,7 +142,7 @@ function ItemList({
         TARGET_HINT_MS
       );
     },
-    [onToggleTarget]
+    [onLongPress]
   );
 
   const handleAdd = () => {
@@ -180,19 +198,29 @@ function ItemList({
           onFocus={() => setListActive(true)}
           onBlur={() => setListActive(false)}
         >
-          {items.map((item, i) => (
-            <MemoItemRow
-              key={item.id}
-              item={item}
-              color={SLICE_COLORS[i % SLICE_COLORS.length]}
-              isTarget={targetId === item.id}
-              showMark={revealTarget && targetId === item.id}
-              spinning={spinning}
-              removeAriaLabel={t.removeAriaLabel(item.label)}
-              onLongPress={handleLongPress}
-              onRemove={onRemove}
-            />
-          ))}
+          {items.map((item, i) => {
+            const mark = marks[item.id];
+            return (
+              <MemoItemRow
+                key={item.id}
+                item={item}
+                color={SLICE_COLORS[i % SLICE_COLORS.length]}
+                mark={mark}
+                markLabel={
+                  mark === "first"
+                    ? t.orderMarkFirst
+                    : mark === "last"
+                      ? t.orderMarkLast
+                      : undefined
+                }
+                showMark={revealMarks && mark !== undefined}
+                busy={busy}
+                removeAriaLabel={t.removeAriaLabel(item.label)}
+                onLongPress={handleLongPress}
+                onRemove={onRemove}
+              />
+            );
+          })}
         </ul>
       )}
 
