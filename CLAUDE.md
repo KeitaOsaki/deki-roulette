@@ -40,6 +40,7 @@ npm run lint      # ESLint 実行
 - `src/components/ItemList.tsx` — 項目の追加・削除・隠しジェスチャの受け口と、印の表示制御。両画面で共有する。
 - `src/components/LocaleSwitch.tsx` — 同じページの別言語 URL へのリンク。
 - `src/components/LocaleNotice.tsx` — 別言語版への誘導リンク。
+- `src/components/AdUnit.tsx` — AdSense の手動広告ユニット 1 枠。スクリプトの読み込みもここで行う。
 
 ### スピンの仕組み
 
@@ -108,12 +109,22 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
 - プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
 - `public/og.png` は Slack 等のリンク展開で映る可能性があるため、盤面だけの中立な絵にしてある。再生成する場合も仕込みを示唆する要素を入れない。
-- `public/robots.txt` / `public/sitemap.xml` はビルド時に `dist/` へコピーされる。sitemap は 6 URL すべてを載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
+- `public/robots.txt` / `public/sitemap.xml` / `public/ads.txt` はビルド時に `dist/` へコピーされる。sitemap は 6 URL すべてを載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
 - JSON-LD は `<script type="application/ld+json">`。データブロックなので CSP の `script-src` には引っかからない。
+
+### 広告
+
+Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッターの直前のレスポンシブ枠と、`xl` 以上でだけ出す左余白の 160×600 の縦長枠。
+
+- プライバシーポリシーには広告を出さない。`PrivacyPage` は `PageFrame` を使わないので枠がなく、スクリプトも読まない。
+- `adsbygoogle.js` はエントリ HTML の `<head>` に書かず、`AdUnit` がマウント後に差し込む。広告枠のあるページだけで読むため。
+- 自動広告（アンカー・モバイル全画面を含む）は AdSense 管理画面でオフにしておく。挿入位置を制御できず、プリレンダした `#root` の中へ入ると hydration が崩れる。ページ間の移動で全画面広告が出るのもステルス前提の使い方を邪魔する。
+- パブリッシャー ID と広告ユニット ID は `src/config.ts` の `ADSENSE_CLIENT` / `AD_SLOTS`。`AD_SLOTS` が `null` の枠は描画せず、すべて `null` なら広告リクエストは一切飛ばない。`public/ads.txt` と、広告のある 4 つのエントリ HTML の `meta[name=google-adsense-account]`（サイト所有の確認用）の ID もこれと揃える。
+- 非表示の枠（`display:none`）へ push すると失敗してその枠は埋まらなくなるので、`AdUnit` は幅が付いてから push する。
 
 ### セキュリティヘッダ
 
-`public/_headers` に CSP と各種セキュリティヘッダを定義。ビルド時に `dist/_headers` へコピーされ、Cloudflare の静的アセット配信が適用する。外部スクリプトを追加する場合は `script-src` / `connect-src` の更新が必要。
+`public/_headers` に CSP と各種セキュリティヘッダを定義。ビルド時に `dist/_headers` へコピーされ、Cloudflare の静的アセット配信が適用する。外部スクリプトを追加する場合は `script-src` / `connect-src` の更新が必要。AdSense のため `script-src` / `frame-src` / `connect-src` に Google の広告ドメインを並べ、広告画像の配信元は固定できないので `img-src` は `https:` を許可している。
 
 ### パスエイリアス
 

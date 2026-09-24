@@ -1,11 +1,16 @@
-import { useState, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
+import { AD_SLOTS } from "../config";
 import { useLocaleSuggestion } from "../hooks/useLocaleSuggestion";
 import { PAGE_PATHS, type Locale, type Page, type T } from "../i18n";
+import AdUnit from "./AdUnit";
 import LocaleNotice from "./LocaleNotice";
 import LocaleSwitch from "./LocaleSwitch";
 
 const SUMMARY_CLASS =
   "flex cursor-pointer list-none items-center gap-2 text-base font-bold text-ivory before:text-muted before:transition-transform before:content-['▸'] group-open:before:rotate-90 [&::-webkit-details-marker]:hidden";
+
+const SIDE_AD_STYLE: CSSProperties = { display: "inline-block", width: 160, height: 600 };
+const FOOTER_AD_STYLE: CSSProperties = { display: "block" };
 
 type Props = {
   locale: Locale;
@@ -38,8 +43,17 @@ export default function PageFrame({
   const otherLabel = page === "order" ? t.rouletteNavLabel : t.orderNavLabel;
 
   return (
-    <div className="min-h-screen bg-ink-900 font-sans text-ivory">
-      <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8">
+    // 左右に同じ幅の列を取り、本文の列を画面中央に保ったまま左の余白へ広告を置く
+    <div className="min-h-screen bg-ink-900 font-sans text-ivory xl:grid xl:grid-cols-[1fr_minmax(0,48rem)_1fr]">
+      {AD_SLOTS.side !== null ? (
+        <aside className="hidden pr-6 pt-10 xl:block">
+          <div className="sticky top-10 ml-auto w-[160px]">
+            <AdUnit slot={AD_SLOTS.side} style={SIDE_AD_STYLE} />
+          </div>
+        </aside>
+      ) : null}
+
+      <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8 xl:col-start-2">
         {suggestedLocale !== null ? (
           <LocaleNotice locale={suggestedLocale} page={page} />
         ) : null}
@@ -64,6 +78,12 @@ export default function PageFrame({
         </header>
 
         {children}
+
+        {AD_SLOTS.footer !== null ? (
+          <div className="mt-16 sm:mt-24">
+            <AdUnit slot={AD_SLOTS.footer} style={FOOTER_AD_STYLE} responsive />
+          </div>
+        ) : null}
 
         <footer className="mt-16 border-t border-ink-700 pt-8 text-sm leading-relaxed text-muted sm:mt-24">
           {/* 開始した瞬間に畳む。人前で回すときに開きっぱなしを踏まないための保険 */}
