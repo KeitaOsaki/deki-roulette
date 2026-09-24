@@ -60,6 +60,69 @@ export const translations = {
       "発表やプレゼンの順番決め、幹事の持ち回り、掃除当番の割り当て、チーム内のレビュー担当、席替え、くじ引きの代わりに。登録もインストールも不要で、スマホからも PC からも無料で使えます。",
     orderDefaultItems: ["A チーム", "B チーム", "C チーム", "D チーム"],
     defaultItems: ["ラーメン", "カレー", "寿司", "焼肉"],
+    privacyLinkLabel: "プライバシーポリシー",
+    privacyTitle: "プライバシーポリシー",
+    privacyBackLabel: "ルーレットに戻る",
+    privacyIntro:
+      "デキレーレット（以下「本サービス」）における、利用者の情報の取り扱いを定めます。",
+    privacySections: [
+      {
+        heading: "入力した項目と結果",
+        body: [
+          "入力した項目や抽選・並べ替えの結果は、お使いのブラウザの中だけで処理します。サーバへの送信や保存はせず、ページを閉じたり再読み込みしたりすると消えます。",
+          "ブラウザの言語設定は、別の言語版へのリンクを表示するかどうかの判定にだけ使います。この判定もブラウザの中で行い、結果を送信することはありません。",
+        ],
+      },
+      {
+        heading: "アクセス解析",
+        body: [
+          "利用状況の把握のため、Cloudflare, Inc. の Cloudflare Web Analytics を使っています。閲覧したページ、参照元、ブラウザの種類、国・地域、表示速度などを集計します。Cookie やブラウザへの保存は使わず、利用者を個別に識別・追跡することもありません。",
+        ],
+        link: {
+          label: "Cloudflare のプライバシーポリシー",
+          href: "https://www.cloudflare.com/ja-jp/privacypolicy/",
+        },
+      },
+      {
+        heading: "配信時の記録",
+        body: [
+          "本サービスは Cloudflare を通じて配信しています。配信の過程で、IP アドレスやアクセス日時などが Cloudflare によって処理されることがあります。これらは不正アクセスの防止や障害への対応のために使われます。Cloudflare は米国の事業者のため、これらの情報やアクセス解析の情報は日本国外で処理されることがあります。",
+        ],
+      },
+      {
+        heading: "Cookie とブラウザへの保存",
+        body: [
+          "本サービスは Cookie を発行せず、ローカルストレージなどブラウザの保存領域も使いません。",
+        ],
+      },
+      {
+        heading: "クリップボード",
+        body: [
+          "順番決めの「結果をコピー」を押したときに限り、結果のテキストをクリップボードへ書き込みます。クリップボードの内容を読み取ることはありません。",
+        ],
+      },
+      {
+        heading: "第三者への提供",
+        body: [
+          "上記の Cloudflare による処理を除き、取得した情報を第三者に提供することはありません。",
+        ],
+      },
+      {
+        heading: "改定",
+        body: [
+          "このポリシーは必要に応じて改定します。改定後の内容は、このページに掲載した時点から効力を生じます。",
+        ],
+      },
+      {
+        heading: "お問い合わせ",
+        body: ["このポリシーに関するお問い合わせは、GitHub の Issue で受け付けています。"],
+        link: {
+          label: "GitHub Issues",
+          href: "https://github.com/KeitaOsaki/deki-roulette/issues",
+        },
+      },
+    ],
+    privacyEstablished: "2026 年 9 月 24 日 制定",
   },
   en: {
     localeName: "English",
@@ -120,6 +183,69 @@ export const translations = {
       "Setting the running order for talks and demos, rotating who hosts, assigning chores or reviews, rearranging seats, or standing in for drawing lots. No sign-up, no install — free on phone and desktop.",
     orderDefaultItems: ["Team A", "Team B", "Team C", "Team D"],
     defaultItems: ["Pizza", "Burger", "Sushi", "Tacos"],
+    privacyLinkLabel: "Privacy Policy",
+    privacyTitle: "Privacy Policy",
+    privacyBackLabel: "Back to Roulette",
+    privacyIntro:
+      "This policy explains how this service (roulette.basekeita.com) handles information about the people who use it.",
+    privacySections: [
+      {
+        heading: "Items and results",
+        body: [
+          "The items you enter and the results of each spin or shuffle are processed only inside your browser. Nothing is sent to or stored on a server, and everything is gone once you close or reload the page.",
+          "Your browser's language setting is used only to decide whether to show a link to the other language version. That check also happens in your browser, and its result is never sent anywhere.",
+        ],
+      },
+      {
+        heading: "Analytics",
+        body: [
+          "To understand how the service is used, we use Cloudflare Web Analytics, provided by Cloudflare, Inc. It aggregates the pages viewed, referrers, browser type, country or region, and page load performance. It does not use cookies or any browser storage, and it does not identify or track individual visitors.",
+        ],
+        link: {
+          label: "Cloudflare Privacy Policy",
+          href: "https://www.cloudflare.com/privacypolicy/",
+        },
+      },
+      {
+        heading: "Delivery logs",
+        body: [
+          "This service is delivered through Cloudflare. In the course of delivery, Cloudflare may process information such as your IP address and the time of access. It is used to prevent abuse and to deal with outages. Because Cloudflare is based in the United States, this information and the analytics data may be processed outside your country.",
+        ],
+      },
+      {
+        heading: "Cookies and browser storage",
+        body: [
+          "This service does not set cookies and does not use local storage or any other browser storage.",
+        ],
+      },
+      {
+        heading: "Clipboard",
+        body: [
+          "Only when you press “Copy result” on the Random Order page do we write the result text to your clipboard. We never read from your clipboard.",
+        ],
+      },
+      {
+        heading: "Sharing with third parties",
+        body: [
+          "Apart from the processing by Cloudflare described above, we do not share collected information with third parties.",
+        ],
+      },
+      {
+        heading: "Changes",
+        body: [
+          "We may update this policy as needed. Changes take effect once they are posted on this page.",
+        ],
+      },
+      {
+        heading: "Contact",
+        body: ["Questions about this policy can be sent through GitHub Issues."],
+        link: {
+          label: "GitHub Issues",
+          href: "https://github.com/KeitaOsaki/deki-roulette/issues",
+        },
+      },
+    ],
+    privacyEstablished: "Effective September 24, 2026",
   },
 } as const;
 
@@ -127,7 +253,7 @@ export type T = (typeof translations)[Locale];
 
 export const LOCALES = ["ja", "en"] as const satisfies readonly Locale[];
 
-export const PAGES = ["roulette", "order"] as const;
+export const PAGES = ["roulette", "order", "privacy"] as const;
 
 export type Page = (typeof PAGES)[number];
 
@@ -135,6 +261,7 @@ export type Page = (typeof PAGES)[number];
 export const PAGE_PATHS = {
   roulette: { ja: "/", en: "/en/" },
   order: { ja: "/order/", en: "/en/order/" },
+  privacy: { ja: "/privacy/", en: "/en/privacy/" },
 } as const satisfies Record<Page, Record<Locale, string>>;
 
 /** 表示言語は URL だけで決まる。クローラが見た HTML と画面が食い違わないための約束。 */
@@ -144,7 +271,8 @@ export function localeFromPath(pathname: string): Locale {
 
 /** 表示するページも同じく URL だけで決まる。 */
 export function pageFromPath(pathname: string): Page {
-  return /^\/(en\/)?order\/?$/.test(pathname) ? "order" : "roulette";
+  const slug = /^\/(?:en\/)?([^/]+)\/?$/.exec(pathname)?.[1];
+  return PAGES.find((page) => page !== "roulette" && page === slug) ?? "roulette";
 }
 
 /** `navigator.languages` は優先度順なので、先に見つかった対応言語を採る。

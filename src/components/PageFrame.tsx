@@ -86,7 +86,15 @@ export default function PageFrame({
             <p className="mt-3 max-w-[62ch] pl-5">{t.notice}</p>
           </details>
 
-          <p className="mt-10 pb-2 text-xs text-muted">&copy; 2026 basekeita</p>
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pb-2 text-xs text-muted">
+            <p>&copy; 2026 basekeita</p>
+            <a
+              href={PAGE_PATHS.privacy[locale]}
+              className="underline decoration-ink-500 underline-offset-4 transition-colors hover:text-ivory hover:decoration-ivory"
+            >
+              {t.privacyLinkLabel}
+            </a>
+          </div>
         </footer>
       </div>
     </div>

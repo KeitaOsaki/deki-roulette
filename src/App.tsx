@@ -1,4 +1,5 @@
 import OrderPage from "./pages/OrderPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import RoulettePage from "./pages/RoulettePage";
 import type { Locale, Page } from "./i18n";
 
@@ -9,9 +10,12 @@ type Props = {
 };
 
 export default function App({ locale, page }: Props) {
-  return page === "order" ? (
-    <OrderPage locale={locale} />
-  ) : (
-    <RoulettePage locale={locale} />
-  );
+  switch (page) {
+    case "order":
+      return <OrderPage locale={locale} />;
+    case "privacy":
+      return <PrivacyPage locale={locale} />;
+    case "roulette":
+      return <RoulettePage locale={locale} />;
+  }
 }

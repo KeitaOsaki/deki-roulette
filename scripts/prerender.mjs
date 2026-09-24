@@ -9,6 +9,8 @@ const PAGES = [
   { locale: "en", page: "roulette", html: "dist/en/index.html" },
   { locale: "ja", page: "order", html: "dist/order/index.html" },
   { locale: "en", page: "order", html: "dist/en/order/index.html" },
+  { locale: "ja", page: "privacy", html: "dist/privacy/index.html" },
+  { locale: "en", page: "privacy", html: "dist/en/privacy/index.html" },
 ];
 
 const PLACEHOLDER = '<div id="root"></div>';
