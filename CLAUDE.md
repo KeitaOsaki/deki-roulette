@@ -15,13 +15,13 @@ npm run lint      # ESLint 実行
 
 ## アーキテクチャ
 
-**出来レーレット** — 結果をユーザが事前に指定できる抽選アプリ。ルーレット (`/`) と順番決め (`/order/`) の 2 画面を、言語 × ページごとの静的 HTML で配る Vite の MPA 構成。
+**出来レーレット** — 結果をユーザが事前に指定できる抽選アプリ。ルーレット (`/`) と順番決め (`/order/`) の 2 画面とプライバシーポリシー (`/privacy/`) を、言語 × ページごとの静的 HTML で配る Vite の MPA 構成。
 
 - `src/config.ts` — スライス色・スピン時間・項目数上限などのドメイン定数。
 - `src/types.ts` — `Item` 型と、リストの行に出す印の `Mark` 型。
 - `src/items.ts` — 項目の ID 生成とラベル正規化。両画面で共有する。
 - `src/shuffle.ts` — Fisher-Yates と、指定された項目を先頭・末尾へ移す `arrange`。
-- `index.html` / `en/index.html` / `order/index.html` / `en/order/index.html` — 4 つのエントリ。ページ別・言語別のメタタグはここに書き分ける。
+- `index.html` / `en/index.html` / `order/index.html` / `en/order/index.html` / `privacy/index.html` / `en/privacy/index.html` — 6 つのエントリ。ページ別・言語別のメタタグはここに書き分ける。
 - `src/i18n.ts` — 日英の文言テーブル、`Locale` / `Page` 型、言語とページから URL への対応。
 - `src/hooks/useRoulette.ts` — 項目・ターゲット・回転・結果のステートとスピンロジック。
 - `src/hooks/useOrder.ts` — 項目・先頭末尾の指定・並べ替え結果のステートと演出時間の計算。
@@ -30,10 +30,11 @@ npm run lint      # ESLint 実行
 - `src/hooks/useReducedMotion.ts` — `prefers-reduced-motion` の購読。
 - `src/App.tsx` — `page` prop で表示するページを選ぶだけ。
 - `src/pages/RoulettePage.tsx` / `src/pages/OrderPage.tsx` — 各画面の組み立て。表示言語は `locale` prop で受け取る。
+- `src/pages/PrivacyPage.tsx` — プライバシーポリシー。`PageFrame` は使わず、見出し・ルーレットへの戻りリンク・言語切替だけを持つ。本文は `i18n.ts` の `privacySections`。
 - `src/main.tsx` — クライアントの入り口。`#root` の中身の有無で hydrate と初回描画を選ぶ。
 - `src/entry-server.tsx` — プリレンダ用に `App` を文字列へ描画する。
 - `scripts/prerender.mjs` — ビルド後に各エントリ HTML の `#root` へ描画結果を差し込む。
-- `src/components/PageFrame.tsx` — 両画面で共通の枠。ヘッダ・言語切替・もう一方のページへの導線・フッターの折りたたみ。
+- `src/components/PageFrame.tsx` — 両画面で共通の枠。ヘッダ・言語切替・もう一方のページへの導線・フッターの折りたたみとプライバシーポリシーへのリンク。
 - `src/components/RouletteWheel.tsx` — SVG 描画。回転は CSS `transform` トランジション。
 - `src/components/OrderResult.tsx` — 順位付きの結果。1 件ずつ現れる遅延をここで掛ける。
 - `src/components/ItemList.tsx` — 項目の追加・削除・隠しジェスチャの受け口と、印の表示制御。両画面で共有する。
@@ -81,7 +82,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 
 ### ページと言語別 URL
 
-ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`。4 つとも独立した静的 HTML で、`vite.config.ts` の `build.rollupOptions.input` に並べてある。JS バンドルは共通で、react-router は入れない。
+ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`、プライバシーポリシーが `/privacy/` と `/en/privacy/`。6 つとも独立した静的 HTML で、`vite.config.ts` の `build.rollupOptions.input` に並べてある。JS バンドルは共通で、react-router は入れない。
 
 - 表示言語もページも URL だけで決まる（`localeFromPath` / `pageFromPath`）。`navigator.language` は表示の決定に使わない。焼き込んだ HTML と画面が食い違わないため。
 - 言語切替とページ間の移動はステートの切替ではなく `<a href>` での遷移。行き先は `PAGE_PATHS` が唯一の定義。言語を切り替えても同じページに留まる。
@@ -104,9 +105,10 @@ JS が動く前から画面のテキストがすべて HTML にある。
   `<h1>` はブランド名だけの「デキレーレット」。
 - 順番決めの `<title>` は日本語版が「順番決め｜無料のランダム並べ替えツール｜デキレーレット」、`<h1>` は「順番決め」。
 - 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
-- どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にも書かない。
+- どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
+- プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
 - `public/og.png` は Slack 等のリンク展開で映る可能性があるため、盤面だけの中立な絵にしてある。再生成する場合も仕込みを示唆する要素を入れない。
-- `public/robots.txt` / `public/sitemap.xml` はビルド時に `dist/` へコピーされる。sitemap は 4 URL すべてを載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
+- `public/robots.txt` / `public/sitemap.xml` はビルド時に `dist/` へコピーされる。sitemap は 6 URL すべてを載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
 - JSON-LD は `<script type="application/ld+json">`。データブロックなので CSP の `script-src` には引っかからない。
 
 ### セキュリティヘッダ

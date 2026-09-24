@@ -28,6 +28,8 @@ export default defineConfig({
             en: resolve(__dirname, "en/index.html"),
             jaOrder: resolve(__dirname, "order/index.html"),
             enOrder: resolve(__dirname, "en/order/index.html"),
+            jaPrivacy: resolve(__dirname, "privacy/index.html"),
+            enPrivacy: resolve(__dirname, "en/privacy/index.html"),
           },
         },
       },
