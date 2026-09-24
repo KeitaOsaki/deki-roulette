@@ -41,3 +41,12 @@ export const REDUCED_MOTION_REVEAL_MS = 200;
 
 /** コピーできたことを伝える表示を出しておく時間。 */
 export const COPY_FEEDBACK_MS = 1800;
+
+/** AdSense のパブリッシャー ID。public/ads.txt の pub- 以降と揃える。 */
+export const ADSENSE_CLIENT = "ca-pub-4418387904920807";
+
+/** AdSense 管理画面で作る広告ユニットの ID。 */
+export const AD_SLOTS = {
+  footer: "0000000000",
+  side: "0000000000",
+} as const;

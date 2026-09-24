@@ -30,6 +30,17 @@
   }
 }
 
+/* 広告の iframe の中身はライト配色。親から dark を継ぐと配色が食い違い、
+   Chrome は iframe の背景を不透明な白で塗るので、読み込み中の枠が白く光る */
+ins.adsbygoogle {
+  color-scheme: light;
+}
+
+/* 在庫がなく埋まらなかった枠は、空白のまま場所を取らないよう畳む */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
