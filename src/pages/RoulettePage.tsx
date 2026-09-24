@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import CopyResultButton from "../components/CopyResultButton";
 import ItemList from "../components/ItemList";
 import PageFrame from "../components/PageFrame";
 import RouletteWheel from "../components/RouletteWheel";
@@ -24,6 +25,13 @@ export default function RoulettePage({ locale }: Props) {
   const marks = useMemo<Marks>(
     () => (roulette.targetId === null ? {} : { [roulette.targetId]: "target" }),
     [roulette.targetId]
+  );
+
+  const { items } = roulette;
+  const resultToText = useCallback(
+    (label: string) =>
+      t.resultCopyText(label, items.map((item) => item.label)),
+    [items, t]
   );
 
   return (
@@ -79,6 +87,12 @@ export default function RoulettePage({ locale }: Props) {
           >
             {roulette.spinning ? t.spinning : t.spin}
           </button>
+
+          <CopyResultButton
+            result={roulette.result}
+            toText={resultToText}
+            t={t}
+          />
         </div>
 
         <ItemList

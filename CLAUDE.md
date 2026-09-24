@@ -37,6 +37,7 @@ npm run lint      # ESLint 実行
 - `src/components/PageFrame.tsx` — 両画面で共通の枠。ヘッダ・言語切替・もう一方のページへの導線・フッターの折りたたみとプライバシーポリシーへのリンク。
 - `src/components/RouletteWheel.tsx` — SVG 描画。回転は CSS `transform` トランジション。
 - `src/components/OrderResult.tsx` — 順位付きの結果。1 件ずつ現れる遅延をここで掛ける。
+- `src/components/CopyResultButton.tsx` — 結果をクリップボードへ書き込むボタンと「コピーしました」の表示。両画面で共有する。
 - `src/components/ItemList.tsx` — 項目の追加・削除・隠しジェスチャの受け口と、印の表示制御。両画面で共有する。
 - `src/components/LocaleSwitch.tsx` — 同じページの別言語 URL へのリンク。
 - `src/components/LocaleNotice.tsx` — 別言語版への誘導リンク。
