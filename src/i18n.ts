@@ -11,6 +11,8 @@ export const translations = {
     spinning: "スピン中…",
     resultPlaceholder: "スピンすると、ここに結果が出ます",
     resultAnnounce: (label: string) => `結果は ${label} です`,
+    resultCopyText: (label: string, candidates: readonly string[]) =>
+      `ルーレットの結果は「${label}」でした！\n候補：${candidates.join("、")}`,
     itemListTitle: "項目",
     addPlaceholder: "項目を入力",
     addButton: "追加",
@@ -43,8 +45,8 @@ export const translations = {
     orderResultPlaceholder: "並べ替えると、ここに順番が出ます",
     orderResultTitle: "結果",
     orderRankAriaLabel: (rank: number) => `${rank} 番目`,
-    orderCopy: "結果をコピー",
-    orderCopied: "コピーしました",
+    copyResult: "結果をコピー",
+    copied: "コピーしました",
     orderMarkFirst: "先頭",
     orderMarkLast: "末尾",
     orderHelpBasic:
@@ -98,7 +100,7 @@ export const translations = {
       {
         heading: "クリップボード",
         body: [
-          "順番決めの「結果をコピー」を押したときに限り、結果のテキストをクリップボードへ書き込みます。クリップボードの内容を読み取ることはありません。",
+          "ルーレットと順番決めの「結果をコピー」を押したときに限り、結果のテキストをクリップボードへ書き込みます。クリップボードの内容を読み取ることはありません。",
         ],
       },
       {
@@ -134,6 +136,8 @@ export const translations = {
     spinning: "Spinning…",
     resultPlaceholder: "Spin the wheel to see the result",
     resultAnnounce: (label: string) => `The result is ${label}`,
+    resultCopyText: (label: string, candidates: readonly string[]) =>
+      `The roulette landed on “${label}”!\nOptions: ${candidates.join(", ")}`,
     itemListTitle: "Items",
     addPlaceholder: "Add an item",
     addButton: "Add",
@@ -166,8 +170,8 @@ export const translations = {
     orderResultPlaceholder: "Shuffle to see the running order",
     orderResultTitle: "Result",
     orderRankAriaLabel: (rank: number) => `Position ${rank}`,
-    orderCopy: "Copy result",
-    orderCopied: "Copied",
+    copyResult: "Copy result",
+    copied: "Copied",
     orderMarkFirst: "First",
     orderMarkLast: "Last",
     orderHelpBasic:
@@ -221,7 +225,7 @@ export const translations = {
       {
         heading: "Clipboard",
         body: [
-          "Only when you press “Copy result” on the Random Order page do we write the result text to your clipboard. We never read from your clipboard.",
+          "Only when you press “Copy result” on the Roulette or Random Order page do we write the result text to your clipboard. We never read from your clipboard.",
         ],
       },
       {

@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import CopyResultButton from "../components/CopyResultButton";
 import ItemList from "../components/ItemList";
 import OrderResult from "../components/OrderResult";
 import PageFrame from "../components/PageFrame";
-import { COPY_FEEDBACK_MS } from "../config";
 import { useOrder } from "../hooks/useOrder";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { makeItems } from "../items";
 import { translations, type Locale } from "../i18n";
 import type { Item } from "../types";
+
+const orderToText = (ordered: Item[]) =>
+  ordered.map((item, i) => `${i + 1}. ${item.label}`).join("\n");
 
 type Props = {
   locale: Locale;
@@ -21,34 +23,6 @@ export default function OrderPage({ locale }: Props) {
     () => makeItems(translations[locale].orderDefaultItems),
     reducedMotion
   );
-
-  // コピー済みかどうかは「どの結果をコピーしたか」から導く。フラグにすると
-  // 並べ替え直すたびに effect で消して回ることになる。
-  const [copiedResult, setCopiedResult] = useState<Item[] | null>(null);
-  const copyTimerRef = useRef<number | undefined>(undefined);
-
-  useEffect(() => () => clearTimeout(copyTimerRef.current), []);
-
-  const { ordered } = order;
-  const copied = ordered !== null && copiedResult === ordered;
-
-  const handleCopy = useCallback(async () => {
-    if (ordered === null) return;
-    const text = ordered
-      .map((item, i) => `${i + 1}. ${item.label}`)
-      .join("\n");
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      return;
-    }
-    setCopiedResult(ordered);
-    clearTimeout(copyTimerRef.current);
-    copyTimerRef.current = window.setTimeout(
-      () => setCopiedResult(null),
-      COPY_FEEDBACK_MS
-    );
-  }, [ordered]);
 
   return (
     <PageFrame
@@ -88,17 +62,11 @@ export default function OrderPage({ locale }: Props) {
             {order.revealing ? t.orderShuffling : t.orderShuffle}
           </button>
 
-          <div className="flex h-8 items-center">
-            {order.ordered !== null && !order.revealing ? (
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="rounded-full border border-ink-700 bg-ink-800 px-4 py-1.5 text-xs font-bold text-muted transition-colors hover:border-ivory/40 hover:text-ivory"
-              >
-                {copied ? t.orderCopied : t.orderCopy}
-              </button>
-            ) : null}
-          </div>
+          <CopyResultButton
+            result={order.revealing ? null : order.ordered}
+            toText={orderToText}
+            t={t}
+          />
         </div>
 
         <ItemList
