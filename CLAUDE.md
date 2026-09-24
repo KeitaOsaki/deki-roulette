@@ -119,7 +119,7 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 - プライバシーポリシーには広告を出さない。`PrivacyPage` は `PageFrame` を使わないので枠がなく、スクリプトも読まない。
 - `adsbygoogle.js` はエントリ HTML の `<head>` に書かず、`AdUnit` がマウント後に差し込む。広告枠のあるページだけで読むため。
 - 自動広告（アンカー・モバイル全画面を含む）は AdSense 管理画面でオフにしておく。挿入位置を制御できず、プリレンダした `#root` の中へ入ると hydration が崩れる。ページ間の移動で全画面広告が出るのもステルス前提の使い方を邪魔する。
-- パブリッシャー ID と広告ユニット ID は `src/config.ts` の `ADSENSE_CLIENT` / `AD_SLOTS`。`public/ads.txt` と、広告のある 4 つのエントリ HTML の `meta[name=google-adsense-account]`（サイト所有の確認用）の ID もこれと揃える。
+- パブリッシャー ID と広告ユニット ID は `src/config.ts` の `ADSENSE_CLIENT` / `AD_SLOTS`。`AD_SLOTS` が `null` の枠は描画せず、すべて `null` なら広告リクエストは一切飛ばない。`public/ads.txt` と、広告のある 4 つのエントリ HTML の `meta[name=google-adsense-account]`（サイト所有の確認用）の ID もこれと揃える。
 - 非表示の枠（`display:none`）へ push すると失敗してその枠は埋まらなくなるので、`AdUnit` は幅が付いてから push する。
 
 ### セキュリティヘッダ

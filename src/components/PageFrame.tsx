@@ -45,13 +45,15 @@ export default function PageFrame({
   return (
     // 左右に同じ幅の列を取り、本文の列を画面中央に保ったまま左の余白へ広告を置く
     <div className="min-h-screen bg-ink-900 font-sans text-ivory xl:grid xl:grid-cols-[1fr_minmax(0,48rem)_1fr]">
-      <aside className="hidden pr-6 pt-10 xl:block">
-        <div className="sticky top-10 ml-auto w-[160px]">
-          <AdUnit slot={AD_SLOTS.side} style={SIDE_AD_STYLE} />
-        </div>
-      </aside>
+      {AD_SLOTS.side !== null ? (
+        <aside className="hidden pr-6 pt-10 xl:block">
+          <div className="sticky top-10 ml-auto w-[160px]">
+            <AdUnit slot={AD_SLOTS.side} style={SIDE_AD_STYLE} />
+          </div>
+        </aside>
+      ) : null}
 
-      <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-col px-5 py-10 sm:px-8 xl:col-start-2">
         {suggestedLocale !== null ? (
           <LocaleNotice locale={suggestedLocale} page={page} />
         ) : null}
@@ -77,11 +79,13 @@ export default function PageFrame({
 
         {children}
 
-        <div className="mt-16 sm:mt-24">
-          <AdUnit slot={AD_SLOTS.footer} style={FOOTER_AD_STYLE} responsive />
-        </div>
+        {AD_SLOTS.footer !== null ? (
+          <div className="mt-16 sm:mt-24">
+            <AdUnit slot={AD_SLOTS.footer} style={FOOTER_AD_STYLE} responsive />
+          </div>
+        ) : null}
 
-        <footer className="mt-12 border-t border-ink-700 pt-8 text-sm leading-relaxed text-muted">
+        <footer className="mt-16 border-t border-ink-700 pt-8 text-sm leading-relaxed text-muted sm:mt-24">
           {/* 開始した瞬間に畳む。人前で回すときに開きっぱなしを踏まないための保険 */}
           <details
             className="group"
