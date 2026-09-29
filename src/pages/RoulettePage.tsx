@@ -103,6 +103,7 @@ export default function RoulettePage({ locale }: Props) {
           atCapacity={roulette.atCapacity}
           t={t}
           onAdd={roulette.addItem}
+          onRename={roulette.renameItem}
           onRemove={roulette.removeItem}
           onLongPress={roulette.toggleTarget}
         />

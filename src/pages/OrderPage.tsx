@@ -77,6 +77,7 @@ export default function OrderPage({ locale }: Props) {
           atCapacity={order.atCapacity}
           t={t}
           onAdd={order.addItem}
+          onRename={order.renameItem}
           onRemove={order.removeItem}
           onLongPress={order.cycleMark}
         />

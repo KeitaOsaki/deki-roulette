@@ -8,6 +8,7 @@ import {
 } from "../config";
 import { useLongPress } from "../hooks/useLongPress";
 import type { T } from "../i18n";
+import { normalizeLabel } from "../items";
 import type { Item, Mark, Marks } from "../types";
 
 /** 指定中は塗りを抜いてリングにする。位置も大きさも変えないので、
@@ -32,8 +33,10 @@ type RowProps = {
   markLabel: string | undefined;
   showMark: boolean;
   busy: boolean;
+  editAriaLabel: string;
   removeAriaLabel: string;
   onLongPress: (id: string) => void;
+  onRename: (id: string, label: string) => void;
   onRemove: (id: string) => void;
 };
 
@@ -44,40 +47,108 @@ function ItemRow({
   markLabel,
   showMark,
   busy,
+  editAriaLabel,
   removeAriaLabel,
   onLongPress,
+  onRename,
   onRemove,
 }: RowProps) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const discardRef = useRef(false);
+  const refocusRef = useRef(false);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+
   const handleLongPress = useCallback(
     () => onLongPress(item.id),
     [item.id, onLongPress]
   );
   const longPress = useLongPress(handleLongPress, busy);
 
+  // Enter / Escape で抜けたときだけ編集ボタンへ戻す。クリックで抜けたときに
+  // 戻すと、クリックした先のフォーカスを奪ってしまう。
+  useEffect(() => {
+    if (draft !== null || !refocusRef.current) return;
+    refocusRef.current = false;
+    editButtonRef.current?.focus();
+  }, [draft]);
+
+  const finishEdit = () => {
+    if (draft === null) return;
+    const label = normalizeLabel(draft);
+    // 変えていないのに結果表示を消さないよう、差分があるときだけ渡す
+    if (!discardRef.current && label && label !== item.label) {
+      onRename(item.id, label);
+    }
+    discardRef.current = false;
+    setDraft(null);
+  };
+
   return (
     <li
-      className={`flex items-center rounded-xl border bg-ink-800 pr-2.5 transition-colors ${
+      className={`flex items-center rounded-xl border bg-ink-800 pr-2.5 transition-colors focus-within:border-ink-400 ${
         showMark ? "border-ink-500" : "border-ink-700"
       }`}
     >
-      {/* 印を伏せている間は aria-pressed も落とす。残すと DOM と
-          アクセシビリティツリーに指定先が出たままになる。 */}
-      <button
-        type="button"
-        {...longPress}
-        aria-pressed={showMark ? true : undefined}
-        className="no-callout flex min-w-0 flex-1 select-none items-center gap-2.5 rounded-xl py-2 pl-3 text-left"
-      >
-        <span
-          aria-hidden
-          className="h-3 w-3 shrink-0 rounded-full transition-[background-color,box-shadow] duration-150"
-          style={markStyle(showMark ? mark : undefined, color)}
-        />
-        <span className="truncate text-sm text-ivory">{item.label}</span>
-        {showMark && markLabel !== undefined ? (
-          <span className="sr-only">{markLabel}</span>
-        ) : null}
-      </button>
+      {draft !== null ? (
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 py-2 pl-3">
+          <span
+            aria-hidden
+            className="h-3 w-3 shrink-0 rounded-full"
+            style={markStyle(undefined, color)}
+          />
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={finishEdit}
+            onKeyDown={(e) => {
+              // IME の変換確定の Enter で編集を抜けないようにする
+              if (e.nativeEvent.isComposing) return;
+              if (e.key === "Escape") discardRef.current = true;
+              else if (e.key !== "Enter") return;
+              e.preventDefault();
+              refocusRef.current = true;
+              e.currentTarget.blur();
+            }}
+            autoFocus
+            maxLength={MAX_LABEL_LENGTH}
+            autoComplete="off"
+            aria-label={editAriaLabel}
+            className="min-w-0 flex-1 bg-transparent text-sm text-ivory focus:outline-none"
+          />
+        </div>
+      ) : (
+        // 印を伏せている間は aria-pressed も落とす。残すと DOM と
+        // アクセシビリティツリーに指定先が出たままになる。
+        <button
+          type="button"
+          {...longPress}
+          aria-pressed={showMark ? true : undefined}
+          className="no-callout flex min-w-0 flex-1 select-none items-center gap-2.5 rounded-xl py-2 pl-3 text-left"
+        >
+          <span
+            aria-hidden
+            className="h-3 w-3 shrink-0 rounded-full transition-[background-color,box-shadow] duration-150"
+            style={markStyle(showMark ? mark : undefined, color)}
+          />
+          <span className="truncate text-sm text-ivory">{item.label}</span>
+          {showMark && markLabel !== undefined ? (
+            <span className="sr-only">{markLabel}</span>
+          ) : null}
+        </button>
+      )}
+      {draft === null ? (
+        <button
+          ref={editButtonRef}
+          type="button"
+          onClick={() => setDraft(item.label)}
+          disabled={busy}
+          aria-label={editAriaLabel}
+          className="shrink-0 rounded px-1 py-2 text-sm leading-none text-ink-400 transition-colors hover:text-ivory disabled:cursor-not-allowed"
+        >
+          ✎
+        </button>
+      ) : null}
       <button
         type="button"
         onClick={() => onRemove(item.id)}
@@ -103,6 +174,7 @@ type Props = {
   atCapacity: boolean;
   t: T;
   onAdd: (label: string) => void;
+  onRename: (id: string, label: string) => void;
   onRemove: (id: string) => void;
   onLongPress: (id: string) => void;
 };
@@ -115,6 +187,7 @@ function ItemList({
   atCapacity,
   t,
   onAdd,
+  onRename,
   onRemove,
   onLongPress,
 }: Props) {
@@ -215,8 +288,10 @@ function ItemList({
                 }
                 showMark={revealMarks && mark !== undefined}
                 busy={busy}
+                editAriaLabel={t.editAriaLabel(item.label)}
                 removeAriaLabel={t.removeAriaLabel(item.label)}
                 onLongPress={handleLongPress}
+                onRename={onRename}
                 onRemove={onRemove}
               />
             );

@@ -21,6 +21,7 @@ export const translations = {
     atCapacity: (max: number) => `項目は ${max} 個までです`,
     itemCount: (count: number, max: number) => `${count} / ${max}`,
     removeAriaLabel: (label: string) => `${label} を削除`,
+    editAriaLabel: (label: string) => `${label} を編集`,
     helpTitle: "使い方",
     helpBasic:
       "項目を追加してスピンを押すだけです。項目は 2 個から 24 個まで登録できます。",
@@ -146,6 +147,7 @@ export const translations = {
     atCapacity: (max: number) => `You can add up to ${max} items`,
     itemCount: (count: number, max: number) => `${count} / ${max}`,
     removeAriaLabel: (label: string) => `Remove ${label}`,
+    editAriaLabel: (label: string) => `Edit ${label}`,
     helpTitle: "How to use",
     helpBasic:
       "Add your options and press Spin. You can register between 2 and 24 items.",

@@ -58,6 +58,15 @@ export function useOrder(
     setOrdered(null);
   }, []);
 
+  const renameItem = useCallback((id: string, raw: string) => {
+    const label = normalizeLabel(raw);
+    if (!label) return;
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, label } : item))
+    );
+    setOrdered(null);
+  }, []);
+
   const removeItem = useCallback((id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
     setPositions((prev) => ({
@@ -106,6 +115,7 @@ export function useOrder(
     canShuffle,
     atCapacity: items.length >= MAX_ITEMS,
     addItem,
+    renameItem,
     removeItem,
     cycleMark,
     shuffleItems,
