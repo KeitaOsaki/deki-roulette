@@ -62,7 +62,7 @@ export const translations = {
     orderUseCases:
       "発表やプレゼンの順番決め、幹事の持ち回り、掃除当番の割り当て、チーム内のレビュー担当、席替え、くじ引きの代わりに。登録もインストールも不要で、スマホからも PC からも無料で使えます。",
     orderDefaultItems: ["A チーム", "B チーム", "C チーム", "D チーム"],
-    defaultItems: ["ラーメン", "カレー", "寿司", "焼肉"],
+    defaultItems: ["ラーメン", "寿司", "焼肉"],
     privacyLinkLabel: "プライバシーポリシー",
     privacyTitle: "プライバシーポリシー",
     privacyBackLabel: "ルーレットに戻る",
@@ -188,7 +188,7 @@ export const translations = {
     orderUseCases:
       "Setting the running order for talks and demos, rotating who hosts, assigning chores or reviews, rearranging seats, or standing in for drawing lots. No sign-up, no install — free on phone and desktop.",
     orderDefaultItems: ["Team A", "Team B", "Team C", "Team D"],
-    defaultItems: ["Pizza", "Burger", "Sushi", "Tacos"],
+    defaultItems: ["Pizza", "Burger", "Sushi"],
     privacyLinkLabel: "Privacy Policy",
     privacyTitle: "Privacy Policy",
     privacyBackLabel: "Back to Roulette",
