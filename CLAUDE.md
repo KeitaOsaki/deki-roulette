@@ -38,7 +38,7 @@ npm run lint      # ESLint 実行
 - `src/components/RouletteWheel.tsx` — SVG 描画。回転は CSS `transform` トランジション。
 - `src/components/OrderResult.tsx` — 順位付きの結果。1 件ずつ現れる遅延をここで掛ける。
 - `src/components/CopyResultButton.tsx` — 結果をクリップボードへ書き込むボタンと「コピーしました」の表示。両画面で共有する。
-- `src/components/ItemList.tsx` — 項目の追加・削除・隠しジェスチャの受け口と、印の表示制御。両画面で共有する。
+- `src/components/ItemList.tsx` — 項目の追加・編集・削除・隠しジェスチャの受け口と、印の表示制御。編集は ✎ ボタンから行をその場で入力欄に切り替える（ラベルの単純クリックは何もしない仕様を保つため）。両画面で共有する。
 - `src/components/LocaleSwitch.tsx` — 同じページの別言語 URL へのリンク。
 - `src/components/LocaleNotice.tsx` — 別言語版への誘導リンク。
 - `src/components/AdUnit.tsx` — AdSense の手動広告ユニット 1 枠。スクリプトの読み込みもここで行う。

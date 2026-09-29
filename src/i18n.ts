@@ -21,6 +21,7 @@ export const translations = {
     atCapacity: (max: number) => `項目は ${max} 個までです`,
     itemCount: (count: number, max: number) => `${count} / ${max}`,
     removeAriaLabel: (label: string) => `${label} を削除`,
+    editAriaLabel: (label: string) => `${label} を編集`,
     helpTitle: "使い方",
     helpBasic:
       "項目を追加してスピンを押すだけです。項目は 2 個から 24 個まで登録できます。",
@@ -61,7 +62,7 @@ export const translations = {
     orderUseCases:
       "発表やプレゼンの順番決め、幹事の持ち回り、掃除当番の割り当て、チーム内のレビュー担当、席替え、くじ引きの代わりに。登録もインストールも不要で、スマホからも PC からも無料で使えます。",
     orderDefaultItems: ["A チーム", "B チーム", "C チーム", "D チーム"],
-    defaultItems: ["ラーメン", "カレー", "寿司", "焼肉"],
+    defaultItems: ["ラーメン", "寿司", "焼肉"],
     privacyLinkLabel: "プライバシーポリシー",
     privacyTitle: "プライバシーポリシー",
     privacyBackLabel: "ルーレットに戻る",
@@ -146,6 +147,7 @@ export const translations = {
     atCapacity: (max: number) => `You can add up to ${max} items`,
     itemCount: (count: number, max: number) => `${count} / ${max}`,
     removeAriaLabel: (label: string) => `Remove ${label}`,
+    editAriaLabel: (label: string) => `Edit ${label}`,
     helpTitle: "How to use",
     helpBasic:
       "Add your options and press Spin. You can register between 2 and 24 items.",
@@ -186,7 +188,7 @@ export const translations = {
     orderUseCases:
       "Setting the running order for talks and demos, rotating who hosts, assigning chores or reviews, rearranging seats, or standing in for drawing lots. No sign-up, no install — free on phone and desktop.",
     orderDefaultItems: ["Team A", "Team B", "Team C", "Team D"],
-    defaultItems: ["Pizza", "Burger", "Sushi", "Tacos"],
+    defaultItems: ["Pizza", "Burger", "Sushi"],
     privacyLinkLabel: "Privacy Policy",
     privacyTitle: "Privacy Policy",
     privacyBackLabel: "Back to Roulette",
