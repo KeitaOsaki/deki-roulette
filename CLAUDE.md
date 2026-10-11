@@ -19,7 +19,7 @@ pnpm run deploy    # build してから wrangler deploy
 Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満を、Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
 
 テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
-(`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
+(`shuffle.ts` / `items.ts`) の検証と、6 つのエントリ HTML の HTML コメント検査 (`entryHtml.test.ts`) が中心で、DOM を使う検証は未導入。
 テストのファイルも `tsc -b` と ESLint の対象になる。`vitest` は `import` で明示し、グローバルには置かない。
 
 パッケージマネージャは pnpm。版は `package.json` の `packageManager` で固定し、CI は `pnpm/action-setup` がそこから読む。
@@ -122,7 +122,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - 日本語版の `<title>` / `og:title` / `twitter:title` は「デキレーレット｜無料で使えるインチキルーレットアプリ」、
   `<h1>` はブランド名だけの「デキレーレット」。
 - 順番決めの `<title>` は日本語版が「順番決め｜無料のランダム並べ替えツール｜デキレーレット」、`<h1>` は「順番決め」。
-- 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
+- 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブラウザのタブバーは画面共有に映るので、英語版の title を一般語にしている。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
 - どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
 - プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
 - アクセス解析は Cloudflare Web Analytics。ビーコンの `<script>` は 6 つのエントリ HTML に直書きしてあり、CSP の `script-src` / `connect-src` にある `cloudflareinsights` はそのため。Cookie もブラウザの保存領域も使わない。
