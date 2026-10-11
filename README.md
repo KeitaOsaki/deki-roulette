@@ -46,6 +46,7 @@
 | 言語 | TypeScript 5.7 |
 | ビルドツール | Vite 6 |
 | スタイリング | Tailwind CSS 3 |
+| テスト | Vitest 5 |
 | CI/CD | Cloudflare Pages (Connect to Git) |
 | ホスティング | Cloudflare Pages |
 
@@ -53,7 +54,7 @@
 
 ### 前提
 
-- Node.js 18 以上
+- Node.js 22.12 以上
 - npm
 
 ### 手順
@@ -77,6 +78,9 @@ npm run preview
 
 # Lint
 npm run lint
+
+# テスト (Vitest)
+npm test
 ```
 
 ## デプロイ

@@ -10,6 +10,8 @@
     "build:ssr": "BUILD_TARGET=ssr vite build --ssr src/entry-server.tsx --outDir dist-ssr",
     "preview": "npm run build && wrangler dev",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
@@ -33,6 +35,7 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0",
+    "vitest": "^5.0.3",
     "wrangler": "^4.149.0"
   }
 }

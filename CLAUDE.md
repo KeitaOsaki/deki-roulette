@@ -9,9 +9,13 @@ npm run dev       # 開発サーバ起動 (http://localhost:5173)
 npm run build     # 本番ビルド (tsc + クライアント + SSR バンドル + プリレンダ)
 npm run preview   # ビルド結果のプレビュー (http://localhost:4173)
 npm run lint      # ESLint 実行
+npm test          # Vitest を 1 回実行 (CI と同じ)
+npm run test:watch # Vitest をウォッチモードで起動
 ```
 
-テストは未設定。
+テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
+(`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
+テストのファイルも `tsc -b` と ESLint の対象になる。`vitest` は `import` で明示し、グローバルには置かない。
 
 ## アーキテクチャ
 
@@ -73,7 +77,7 @@ npm run lint      # ESLint 実行
 JS が動く前から画面のテキストがすべて HTML にある。
 
 - `npm run build` は クライアントビルド → SSR バンドル (`dist-ssr/`) → `scripts/prerender.mjs` の順。焼き込む対象は `prerender.mjs` の `PAGES`。
-- `BUILD_TARGET=ssr` のときは `vite.config.ts` が `cloudflare()` を外す。SSR バンドルは Node で実行するため。
+- `BUILD_TARGET=ssr` のときと Vitest の実行中は `vite.config.ts` が `cloudflare()` を外す。どちらも Node で実行するため。
 - 表示言語とページを `window.location.pathname` から読むと SSR で落ちるので、`App` は `locale` と `page` を prop で受け取る。
   URL が唯一のソースである点は変わらない (`main.tsx` が `localeFromPath` / `pageFromPath` を呼ぶ)。
 - 焼き込むのは画面に出ている文言だけ。ステルス仕様のとおり `details` は閉じたまま、
