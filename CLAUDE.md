@@ -133,4 +133,8 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 
 ### デプロイ
 
-`main` ブランチへの push で Cloudflare Pages が自動ビルド＆デプロイ（Connect to Git で連携）。
+既定ブランチは `develop`。PR は `develop` へ出し、`develop` へのマージではデプロイされない。
+
+`develop` → `main` の PR をマージすると、Cloudflare の Workers Builds が自動でビルド＆デプロイする
+（Connect to Git で連携）。本番ブランチは `main` で、プレビュービルドは無効。
+リリース PR は merge commit でマージする。squash にすると `develop` と `main` の履歴がずれ、次のリリースで差分が重複する。
