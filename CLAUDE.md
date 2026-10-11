@@ -7,11 +7,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 pnpm run dev       # 開発サーバ起動 (http://localhost:5173)
 pnpm run build     # 本番ビルド (tsc + クライアント + SSR バンドル + プリレンダ)
-pnpm run preview   # ビルド結果のプレビュー (http://localhost:4173)
+pnpm run preview   # build してから wrangler dev で配信 (http://localhost:8787)
 pnpm run lint      # ESLint 実行
 pnpm test          # Vitest を 1 回実行 (CI と同じ)
 pnpm run test:watch # Vitest をウォッチモードで起動
+pnpm run deploy    # build してから wrangler deploy
 ```
+
+`deploy` は手元から本番を直接更新する。リリースは `main` へのマージ（Workers Builds）で出すので、通常は使わない。
+
+Node.js は 22.12 以上の偶数系（Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
 
 テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
 (`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
@@ -43,6 +48,7 @@ pnpm run test:watch # Vitest をウォッチモードで起動
 - `src/main.tsx` — クライアントの入り口。`#root` の中身の有無で hydrate と初回描画を選ぶ。
 - `src/entry-server.tsx` — プリレンダ用に `App` を文字列へ描画する。
 - `scripts/prerender.mjs` — ビルド後に各エントリ HTML の `#root` へ描画結果を差し込む。
+- `src/index.css` — Tailwind のディレクティブ、フォーカスリング、広告枠 (`ins.adsbygoogle`) の配色と未充填時の非表示、`prefers-reduced-motion` でのアニメーション抑制。`.no-callout` は隠しジェスチャを置く要素が iOS Safari の長押しメニューを出さないためのもの。
 - `src/components/PageFrame.tsx` — 両画面で共通の枠。ヘッダ・言語切替・もう一方のページへの導線・フッターの折りたたみとプライバシーポリシーへのリンク。
 - `src/components/RouletteWheel.tsx` — SVG 描画。回転は CSS `transform` トランジション。
 - `src/components/OrderResult.tsx` — 順位付きの結果。1 件ずつ現れる遅延をここで掛ける。
@@ -95,6 +101,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 
 ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`、プライバシーポリシーが `/privacy/` と `/en/privacy/`。6 つとも独立した静的 HTML で、`vite.config.ts` の `build.rollupOptions.input` に並べてある。JS バンドルは共通で、react-router は入れない。
 
+- `/app/privacy/` は iOS アプリ用のプライバシーポリシーで、`public/app/privacy/index.html` をそのまま配る。React・プリレンダ・`vite.config.ts` の `input` のどれも通らず、`noindex` で sitemap にも載せない。内容はアプリの実態（通信なし・解析なし・広告なし）で、Web 版の `privacySections` とは別に保つ。
 - 表示言語もページも URL だけで決まる（`localeFromPath` / `pageFromPath`）。`navigator.language` は表示の決定に使わない。焼き込んだ HTML と画面が食い違わないため。
 - 言語切替とページ間の移動はステートの切替ではなく `<a href>` での遷移。行き先は `PAGE_PATHS` が唯一の定義。言語を切り替えても同じページに留まる。
 - ブラウザの言語が表示中の言語と違うときは、もう一方の言語版へのリンクを最上部に出すだけにする。自動リダイレクトはしない。共有された URL の言語を上書きしてしまう。
@@ -118,6 +125,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
 - どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
 - プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
+- アクセス解析は Cloudflare Web Analytics。ビーコンの `<script>` は 6 つのエントリ HTML に直書きしてあり、CSP の `script-src` / `connect-src` にある `cloudflareinsights` はそのため。Cookie もブラウザの保存領域も使わない。
 - `public/og.png` は Slack 等のリンク展開で映る可能性があるため、盤面だけの中立な絵にしてある。再生成する場合も仕込みを示唆する要素を入れない。
 - `public/robots.txt` / `public/sitemap.xml` / `public/ads.txt` はビルド時に `dist/` へコピーされる。sitemap は 6 URL すべてを載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
 - JSON-LD は `<script type="application/ld+json">`。データブロックなので CSP の `script-src` には引っかからない。
@@ -130,11 +138,22 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 - `adsbygoogle.js` はエントリ HTML の `<head>` に書かず、`AdUnit` がマウント後に差し込む。広告枠のあるページだけで読むため。
 - 自動広告（アンカー・モバイル全画面を含む）は AdSense 管理画面でオフにしておく。挿入位置を制御できず、プリレンダした `#root` の中へ入ると hydration が崩れる。ページ間の移動で全画面広告が出るのもステルス前提の使い方を邪魔する。
 - パブリッシャー ID と広告ユニット ID は `src/config.ts` の `ADSENSE_CLIENT` / `AD_SLOTS`。`AD_SLOTS` が `null` の枠は描画せず、すべて `null` なら広告リクエストは一切飛ばない。`public/ads.txt` と、広告のある 4 つのエントリ HTML の `meta[name=google-adsense-account]`（サイト所有の確認用）の ID もこれと揃える。
+- `AD_SLOTS` に ID を入れて広告を出すと Google が Cookie を使い、閲覧者の情報を受け取る。今の `privacySections` は広告を出していない実態（Cookie なし、提供先は Cloudflare のみ）を書いているので、広告を出す変更と同じ PR で「Cookie とブラウザへの保存」「第三者への提供」と制定日を直す。
 - 非表示の枠（`display:none`）へ push すると失敗してその枠は埋まらなくなるので、`AdUnit` は幅が付いてから push する。
 
 ### セキュリティヘッダ
 
 `public/_headers` に CSP と各種セキュリティヘッダを定義。ビルド時に `dist/_headers` へコピーされ、Cloudflare の静的アセット配信が適用する。外部スクリプトを追加する場合は `script-src` / `connect-src` の更新が必要。AdSense のため `script-src` / `frame-src` / `connect-src` に Google の広告ドメインを並べ、広告画像の配信元は固定できないので `img-src` は `https:` を許可している。
+
+#### HTTPS 専用化
+
+`basekeita.com` ゾーン全体を HTTPS 専用にしてある。リポジトリの外（Cloudflare ダッシュボード）にある設定が半分を占めるので、変えるときは次を崩さない。
+
+- HSTS は Cloudflare の SSL/TLS → エッジ証明書で、max-age 12 か月・サブドメインを含める・プリロードの 3 つをオンにしている。apex の転送応答と `tabi-gacha.basekeita.com` はこのリポジトリの配信物を通らないので、`_headers` だけでは付かない。
+- `_headers` の HSTS はゾーンの設定と同じ値にしておく。Cloudflare がゾーンの値で置き換えるので二重にならない。値を変えるときは両方を直す。
+- apex からの転送は Redirect Rule「root to roulette」（`http.host in {"basekeita.com" "www.basekeita.com"} and ssl`）。`ssl` を外すと HTTP が `https://roulette.basekeita.com/` へ直接飛び、最初の転送先が同一ホストの HTTPS でなくなって、hstspreload.org の要件を満たさなくなる。
+- `includeSubDomains` のため、`*.basekeita.com` のホストは 2 階層目以降（`a.b.basekeita.com`）も含めて、すべて HTTPS で応答しなければならない。サブドメインを足す前に、HTTPS で応答することを確かめる。
+- `preload` は付けたままだが、hstspreload.org へは申請していない。Chrome や Safari は HTTP の移動を自動で HTTPS に上げるので、申請で足される利点は小さく、載ると外すのに数か月かかる。`preload` を付けている間は、フォームから第三者も申請できる（所有者の確認は無い）。申請する前に、`https://hstspreload.org/api/v2/preloadable?domain=basekeita.com` が `errors` を空で返すことを確かめる。
 
 ### パスエイリアス
 
@@ -142,10 +161,14 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 
 ### デプロイ
 
+ホスティングは Cloudflare Workers の静的アセット配信。`wrangler.jsonc` は Worker のコードを持たない、アセットだけの Worker を定める。
+`pnpm run build` が `dist/` に成果物と `dist/wrangler.json` を出し、`.wrangler/deploy/config.json`（生成物で git 管理外）が wrangler をそこへ向ける。
+このため `wrangler dev` / `wrangler deploy` にも Workers Builds にも出力先の指定は要らない（Workers Builds に出力ディレクトリの設定は無い）。
+
 既定ブランチは `develop`。PR は `develop` へ出し、`develop` へのマージではデプロイされない。
 
 `develop` → `main` の PR をマージすると、Cloudflare の Workers Builds が自動でビルド＆デプロイする
-（Connect to Git で連携）。本番ブランチは `main` で、プレビュービルドは無効。
+（Connect to Git で連携）。ビルドコマンドは `pnpm run build`、デプロイコマンドは `wrangler deploy`。本番ブランチは `main` で、プレビュービルドは無効。
 Workers Builds の pnpm は既定が 10.x なので、ビルド変数 `PNPM_VERSION` を `packageManager` と同じ版にしておく。
 リリース PR は merge commit でマージする。squash にすると `develop` と `main` の履歴がずれ、次のリリースで差分が重複する。
 
@@ -153,3 +176,12 @@ Workers Builds の pnpm は既定が 10.x なので、ビルド変数 `PNPM_VERS
 head が `develop` 以外の PR は `Release guard`（`.github/workflows/release-guard.yml` のジョブ `develop-only`）が失敗させ、
 このチェックは `main` の必須チェックになっている。
 `develop` は削除できない（`develop-protect`）。リリース PR の head が `develop` で、マージ後のブランチ自動削除に巻き込まれるため。
+
+### CI と依存更新
+
+`.github/workflows/ci.yml` は PR と `develop` への push で `lint` / `test` / `build` を matrix で並列に走らせる（Node 24、`pnpm install --frozen-lockfile`）。
+型検査だけのジョブは無く、`build` の先頭の `tsc -b` が兼ねる。1 つ落ちても残りは止めない（`fail-fast: false`）。
+
+Dependabot は npm と GitHub Actions を毎週月曜（JST）に見る。`@vitejs/plugin-react` と `tailwindcss` のメジャー更新は無視する設定で、外す条件は `.github/dependabot.yml` のコメントにある。
+
+リリース PR の作成は `release-pr`、Dependabot の PR の精査は `dependabot-triage` のスキルが担う（`.claude/skills/`）。
