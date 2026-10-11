@@ -16,7 +16,7 @@ pnpm run deploy    # build してから wrangler deploy
 
 `deploy` は手元から本番を直接更新する。リリースは `main` へのマージ（Workers Builds）で出すので、通常は使わない。
 
-Node.js は 22.12 以上の偶数系（Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
+Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満を、Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
 
 テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
 (`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
