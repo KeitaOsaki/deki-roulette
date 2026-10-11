@@ -14,7 +14,7 @@ CLEAN は「ブロックされていない」であって「通る」ではな�
 ## 0. 準備
 
 ```bash
-git fetch origin --quiet      # origin/main が古いと、マージ済みの PR が差分に紛れる
+git fetch origin --quiet      # origin/develop が古いと、マージ済みの PR が差分に紛れる
 git status -sb | head -3
 ```
 
@@ -127,21 +127,26 @@ done
 ## 6. 「対応すれば入れられる」PR の解決策を実測する
 
 ```bash
-git worktree add --detach "$S/wt/try" origin/main
+git worktree add --detach "$S/wt/try" origin/develop
 cd "$S/wt/try" && npm ci
 npm install --no-audit --no-fund -D <a>@<ver> <b>@<ver>      # PR の組み合わせを再現
 npm run lint; npm run build
 ```
 
 - 出たエラーは**件数と場所**で報告する（「`path:行` に 1 件」）。
-- 「Update branch」（main の取り込み）が競合するかは実測する。
-  `git merge origin/main` で、`package.json` の隣り合う行や lockfile が競合する。
+- 「Update branch」（develop の取り込み）が競合するかは実測する。
+  `git merge origin/develop` で、`package.json` の隣り合う行や lockfile が競合する。
 - マージの順序を決める。**コード修正 → 依存 PR** の順にすると、依存 PR は rebase で追従できる。
   新旧どちらの版でも動くコードなら、順序の制約は付かない。
 
-## 7. Dependabot ブランチと main の扱い
+## 7. Dependabot ブランチとブランチ運用
 
-- **`main` へ直接 push しない。** 修正は Dependabot のブランチへ積むか、別ブランチで PR にする。
+- Dependabot の PR は既定ブランチの `develop` に出る。**`develop` へのマージはデプロイされない。**
+  本番へ出るのは `develop` → `main` のリリース PR（merge commit）だけで、トリアージの対象外。
+- base が `develop` 以外の PR は、マージ前に `develop` へ付け替えるか作り直す。`main` へ入れるとそのまま本番に出る。
+  `gh pr edit --base` は Projects (classic) の廃止エラーで失敗することがある。
+  その場合は `gh api -X PATCH repos/{owner}/{repo}/pulls/<N> -f base=develop` を使う。
+- **`develop` と `main` へ直接 push しない。** 修正は Dependabot のブランチへ積むか、別ブランチで PR にする。
   どちらにするかはユーザーに聞く。
 - **人が編集したブランチ（「Update branch」のマージコミットを含む）は、Dependabot が管理をやめる。**
   `@dependabot rebase` は断られるので、作り直しは `@dependabot recreate`。
