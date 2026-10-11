@@ -3,6 +3,9 @@ name: Release guard
 on:
   pull_request:
     branches: [main]
+    # ベースの付け替えは edited で届く。既定の types に無く、develop 向けで作った PR を
+    # main に付け替えても必須チェックが報告されないまま止まる
+    types: [opened, synchronize, reopened, edited]
 
 permissions: {}
 
