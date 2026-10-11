@@ -65,6 +65,53 @@ describe('app/privacy の静的 HTML', () => {
   })
 })
 
+function stylesheetHrefs(html: string): string[] {
+  const head = /<head>([\s\S]*?)<\/head>/i.exec(html)?.[1] ?? ''
+  return [...head.matchAll(/<link\s+rel="stylesheet"\s+href="([^"]*)"\s*\/?>/gi)].map((m) => m[1])
+}
+
+describe('404 ページの外部 CSS', () => {
+  it('stylesheetHrefs は相対パスの href をそのまま返す', () => {
+    const relative = '<head><link rel="stylesheet" href="404.css" /></head>'
+    expect(stylesheetHrefs(relative)).toEqual(['404.css'])
+    expect(stylesheetHrefs(relative)).not.toContain('/404.css')
+    expect(stylesheetHrefs('<head><link rel="stylesheet" href="./404.css" /></head>')).not.toContain(
+      '/404.css',
+    )
+  })
+
+  it.each(['public/404.html', 'public/en/404.html'])(
+    '%s の <head> に絶対パスの 404.css への link がある',
+    (rel) => {
+      expect(stylesheetHrefs(read(rel))).toContain('/404.css')
+    },
+  )
+
+  it('404.css が旧 <style> の body と a のルールを持つ', () => {
+    const css = read('public/404.css')
+    expect(css.trim()).not.toBe('')
+    const compact = css.replace(/\s+/g, ' ')
+    expect(compact).toContain('body {')
+    expect(compact).toContain('a {')
+    for (const decl of [
+      'margin: 0',
+      'min-height: 100vh',
+      'display: flex',
+      'flex-direction: column',
+      'align-items: center',
+      'justify-content: center',
+      'gap: 1rem',
+      'background: #0f172a',
+      'color: #e2e8f0',
+      'font-family: system-ui, sans-serif',
+      'text-align: center',
+      'color: #fbbf24',
+    ]) {
+      expect(compact).toContain(decl)
+    }
+  })
+})
+
 describe('style 要素と style 属性の不在', () => {
   const targets = [...new Set([...ENTRIES, ...htmlUnder('public')])]
 
