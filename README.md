@@ -57,7 +57,7 @@
 |---|---|
 | フレームワーク | React 19 |
 | 言語 | TypeScript 5.7 |
-| ビルドツール | Vite 6 |
+| ビルドツール | Vite 8 |
 | スタイリング | Tailwind CSS 3 |
 | テスト | Vitest 5 |
 | リンタ | ESLint 9 (typescript-eslint) |
