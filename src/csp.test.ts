@@ -56,7 +56,7 @@ const ADS_FRAME = [
   'https://fundingchoicesmessages.google.com',
 ]
 
-describe('CSP の style 系ディレクティブ', () => {
+describe('AC1: CSP の style 系ディレクティブ @issue-27 @ac-1', () => {
   it("style-src は 'self' だけ", () => {
     expect(loadCsp().get('style-src')).toEqual(["'self'"])
   })
@@ -83,8 +83,8 @@ describe('CSP の style 系ディレクティブ', () => {
   })
 })
 
-describe('テストの実行環境', () => {
-  it('pnpm test で新しいテストと既存のテストがすべて通る', () => {
+describe('AC5: テストの実行環境 @issue-27 @ac-5', () => {
+  it('AC1〜AC4 と AC6 のテストがそろっている（pnpm test で新しいテストと既存のテストがすべて通る）', () => {
     const pkg = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8')) as {
       scripts: Record<string, string>
     }
@@ -108,8 +108,8 @@ describe('テストの実行環境', () => {
   })
 })
 
-describe('CSP のほかのディレクティブとヘッダ', () => {
-  it('style 系以外のディレクティブは変わっていない', () => {
+describe('AC2: CSP のほかのディレクティブとヘッダ @issue-27 @ac-2', () => {
+  it('ほかのディレクティブが変わっていない（style 系以外のディレクティブは変わっていない）', () => {
     const csp = loadCsp()
     const others = new Map(csp)
     others.delete('style-src')
@@ -142,7 +142,7 @@ describe('CSP のほかのディレクティブとヘッダ', () => {
     })
   })
 
-  it('/* のほかのヘッダは変わっていない', () => {
+  it('ほかのヘッダとパスのルールが変わっていない（/* のほかのヘッダは変わっていない）', () => {
     const rule = loadRules().find((r) => r.path === '/*')
     const rest = new Map(rule?.headers)
     rest.delete('Content-Security-Policy')

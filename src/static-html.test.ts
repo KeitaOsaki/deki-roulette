@@ -27,10 +27,10 @@ function htmlUnder(dir: string): string[] {
   return found
 }
 
-describe('app/privacy の静的 HTML', () => {
+describe('AC3: app/privacy の静的 HTML @issue-27 @ac-3', () => {
   const html = read('public/app/privacy/index.html')
 
-  it('<style 要素がない', () => {
+  it('app/privacy に style 要素がない（<style 要素がない）', () => {
     expect(html).not.toMatch(/<style[\s>]/i)
   })
 
@@ -70,7 +70,7 @@ function stylesheetHrefs(html: string): string[] {
   return [...head.matchAll(/<link\s+rel="stylesheet"\s+href="([^"]*)"\s*\/?>/gi)].map((m) => m[1])
 }
 
-describe('404 ページの外部 CSS', () => {
+describe('AC6: 404 ページの外部 CSS @issue-27 @ac-6', () => {
   it('stylesheetHrefs は相対パスの href をそのまま返す', () => {
     const relative = '<head><link rel="stylesheet" href="404.css" /></head>'
     expect(stylesheetHrefs(relative)).toEqual(['404.css'])
@@ -112,7 +112,7 @@ describe('404 ページの外部 CSS', () => {
   })
 })
 
-describe('style 要素と style 属性の不在', () => {
+describe('AC4: style 要素と style 属性の不在 @issue-27 @ac-4', () => {
   const targets = [...new Set([...ENTRIES, ...htmlUnder('public')])]
 
   it('調べる対象が 7 件以上ある', () => {
