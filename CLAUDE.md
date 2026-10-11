@@ -19,7 +19,7 @@ pnpm run deploy    # build してから wrangler deploy
 Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満を、Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
 
 テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
-(`shuffle.ts` / `items.ts`) の検証と、6 つのエントリ HTML の HTML コメント検査 (`entryHtml.test.ts`) が中心で、DOM を使う検証は未導入。
+(`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
 テストのファイルも `tsc -b` と ESLint の対象になる。`vitest` は `import` で明示し、グローバルには置かない。
 
 パッケージマネージャは pnpm。版は `package.json` の `packageManager` で固定し、CI は `pnpm/action-setup` がそこから読む。
