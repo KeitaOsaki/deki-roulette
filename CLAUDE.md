@@ -138,3 +138,8 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 `develop` → `main` の PR をマージすると、Cloudflare の Workers Builds が自動でビルド＆デプロイする
 （Connect to Git で連携）。本番ブランチは `main` で、プレビュービルドは無効。
 リリース PR は merge commit でマージする。squash にすると `develop` と `main` の履歴がずれ、次のリリースで差分が重複する。
+
+`main` は直接 push と削除ができず、PR が必須（ルールセット `main-protect`）。
+head が `develop` 以外の PR は `Release guard`（`.github/workflows/release-guard.yml` のジョブ `develop-only`）が失敗させ、
+このチェックは `main` の必須チェックになっている。
+`develop` は削除できない（`develop-protect`）。リリース PR の head が `develop` で、マージ後のブランチ自動削除に巻き込まれるため。
