@@ -10,7 +10,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("pickTargetIndex", () => {
+describe("pickTargetIndex @issue-29 @ac-2 @ac-3", () => {
   it("指定がなければ crypto.getRandomValues の値で添字を決める", () => {
     const spy = vi.spyOn(crypto, "getRandomValues").mockImplementation((array) => {
       (array as Uint32Array)[0] = 4;
@@ -45,7 +45,7 @@ describe("pickTargetIndex", () => {
   });
 });
 
-describe("ルーレットの乱数源の記述", () => {
+describe("ルーレットの乱数源の記述 @issue-29 @ac-4", () => {
   const readDoc = (name: string) =>
     readFileSync(new URL(`../../${name}`, import.meta.url), "utf8");
 
