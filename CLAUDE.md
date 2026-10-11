@@ -152,8 +152,8 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 - HSTS は Cloudflare の SSL/TLS → エッジ証明書で、max-age 12 か月・サブドメインを含める・プリロードの 3 つをオンにしている。apex の転送応答と `tabi-gacha.basekeita.com` はこのリポジトリの配信物を通らないので、`_headers` だけでは付かない。
 - `_headers` の HSTS はゾーンの設定と同じ値にしておく。Cloudflare がゾーンの値で置き換えるので二重にならない。値を変えるときは両方を直す。
 - apex からの転送は Redirect Rule「root to roulette」（`http.host in {"basekeita.com" "www.basekeita.com"} and ssl`）。`ssl` を外すと HTTP が `https://roulette.basekeita.com/` へ直接飛び、最初の転送先が同一ホストの HTTPS でなくなって、hstspreload.org の要件を満たさなくなる。
-- `includeSubDomains` と `preload` のため、`*.basekeita.com` のホストはすべて HTTPS で応答しなければならない。サブドメインを足す前に、HTTPS で応答することを確かめる。
-- `basekeita.com` は HSTS preload リストの申請対象。登録後に外しても、各ブラウザへ反映されるまで数か月かかる。
+- `includeSubDomains` のため、`*.basekeita.com` のホストは 2 階層目以降（`a.b.basekeita.com`）も含めて、すべて HTTPS で応答しなければならない。サブドメインを足す前に、HTTPS で応答することを確かめる。
+- `preload` は付けたままだが、hstspreload.org へは申請していない。Chrome や Safari は HTTP の移動を自動で HTTPS に上げるので、申請で足される利点は小さく、載ると外すのに数か月かかる。`preload` を付けている間は、フォームから第三者も申請できる（所有者の確認は無い）。申請する前に、`https://hstspreload.org/api/v2/preloadable?domain=basekeita.com` が `errors` を空で返すことを確かめる。
 
 ### パスエイリアス
 
