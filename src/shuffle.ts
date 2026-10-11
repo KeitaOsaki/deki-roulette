@@ -4,7 +4,7 @@ const UINT32_RANGE = 0x1_0000_0000;
 
 /** [0, max) の一様な整数。剰余は範囲を割り切れない端で偏るので、
  *  割り切れる上限を超えた値は捨てて引き直す。 */
-function randomBelow(max: number) {
+export function randomBelow(max: number) {
   const limit = Math.floor(UINT32_RANGE / max) * max;
   const buf = new Uint32Array(1);
   let value: number;
