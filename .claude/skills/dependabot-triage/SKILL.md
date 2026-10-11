@@ -18,8 +18,8 @@ git fetch origin --quiet      # origin/develop が古いと、マージ済みの
 git status -sb | head -3
 ```
 
-検証は**ユーザーの作業ツリーでやらない。** `npm run dev` が動いていることがあり、
-`checkout` / `npm install` / `build` はそれを壊す。スクラッチパッド配下に worktree を作り、最後に必ず消す。
+検証は**ユーザーの作業ツリーでやらない。** `pnpm run dev` が動いていることがあり、
+`checkout` / `pnpm install` / `build` はそれを壊す。スクラッチパッド配下に worktree を作り、最後に必ず消す。
 
 ## 1. 一覧を取って仕分ける
 
@@ -37,7 +37,7 @@ gh pr list --author "app/dependabot" --state open --limit 100 \
 
 ## 2. CI が通った PR
 
-CI（`.github/workflows/ci.yml`）は `npm ci` → `npm run lint` → `npm run build`。
+CI（`.github/workflows/ci.yml`）は `lint` / `test` / `build` の 3 ジョブ（matrix）で、それぞれ `pnpm install --frozen-lockfile` のあとに `pnpm run <ジョブ名>` を走らせる。
 `build` は `tsc -b` を先頭に走らせるので型検査も兼ね、SSR バンドルとプリレンダまで通る。
 
 ```bash
@@ -54,14 +54,9 @@ gh pr diff <N> | grep -E '^diff|^[+-]\s'     # 何のファイルが変わるか
   §4 の末尾にある静的 HTML の確認と、`react-ui-verify` でのブラウザ確認まで行う。
 - **lockfile を実測で見る。** 単体の bump が、別の依存の古い版を入れ子に残して重複を作ることがある。
   ```bash
-  node -e '
-  const p=require("./package-lock.json").packages, names=process.argv.slice(1);
-  for (const [k,v] of Object.entries(p))
-    if (names.some(n=>k.endsWith("node_modules/"+n)))
-      console.log(k.replace(/^node_modules\//,""), v.version, v.dev?"(dev)":"");
-  ' <パッケージ名>...
+  pnpm why <パッケージ名>...
   ```
-  `a/node_modules/b` のように入れ子で出る行は重複。
+  末尾の `Found N versions of <名前>` が 2 以上なら重複。
 
 ## 3. CI が失敗した PR
 
@@ -93,14 +88,14 @@ mkdir -p "$S/wt" "$S/logs"
 git fetch origin "pull/$N/head" --quiet || exit 90
 git worktree add --detach "$S/wt/pr$N" FETCH_HEAD --quiet || exit 91
 cd "$S/wt/pr$N" || exit 92
-for step in "npm ci" "npm run lint" "npm run build"; do
+for step in "pnpm install --frozen-lockfile" "pnpm run lint" "pnpm test" "pnpm run build"; do
   $step >"$S/logs/pr$N.log" 2>&1; rc=$?
   echo "### $step exit=$rc"
   if [ "$rc" -ne 0 ]; then tail -25 "$S/logs/pr$N.log"; break; fi
 done
 ```
 
-- **`npm ci` / `npm install` がネットワークで失敗したら、後続の lint・build の結果は捨てる。**
+- **`pnpm install` がネットワークで失敗したら、後続の lint・build の結果は捨てる。**
   古い `node_modules` のまま通ってしまう。インストールが成功してからやり直す。
 - CI は Node 24。ローカルが違うなら、報告に「ローカルの Node で確認」と書く。
 - ブラウザに届くコードや SSR・プリレンダに関わる依存（`react`・`react-dom`・`vite`・
@@ -119,7 +114,7 @@ done
   `@cloudflare/vite-plugin` 配下に旧版の `wrangler` を入れ子で残し、`workerd` / `miniflare` / `sharp` も
   二重になる。この 2 つを含むグループ PR（`multi-*` ブランチ）を優先し、単体 bump は見送るか閉じる。
 - **グループ PR は、解決後の版が同じになることがある。**
-  worktree の `package-lock.json` から版を読んで比べる（§2 のスニペット）。
+  worktree の `pnpm why` で版を読んで比べる（§2 のスニペット）。
   同じなら片方を入れれば他方は不要。
 - lockfile を触る PR は、1 つ入れるたびに他が競合する。Dependabot が自動で rebase するが、
   **人が編集したブランチは対象外**（§7）。
@@ -128,9 +123,9 @@ done
 
 ```bash
 git worktree add --detach "$S/wt/try" origin/develop
-cd "$S/wt/try" && npm ci
-npm install --no-audit --no-fund -D <a>@<ver> <b>@<ver>      # PR の組み合わせを再現
-npm run lint; npm run build
+cd "$S/wt/try" && pnpm install --frozen-lockfile
+pnpm add -D <a>@<ver> <b>@<ver>      # PR の組み合わせを再現
+pnpm run lint; pnpm run build
 ```
 
 - 出たエラーは**件数と場所**で報告する（「`path:行` に 1 件」）。
@@ -153,7 +148,7 @@ npm run lint; npm run build
 - 修正コミットを Dependabot のブランチへ積むと、その PR は自動 rebase されなくなる。
   **積む場合はそのトレードオフを伝える。**
 - push は通常の push。force はしない。push 前に、そのブランチの最終状態で
-  `npm ci` → lint → build を通す。push 後は CI の結果まで見る。
+  `pnpm install --frozen-lockfile` → lint → test → build を通す。push 後は CI の結果まで見る。
 - コミットは `commit` スキルの規約（英語の Conventional Commits）に従う。
 
 ## 8. セキュリティの観点
@@ -166,14 +161,9 @@ npm run lint; npm run build
   ```
 - **major を `ignore` で止めると、アラートが開いたまま残ることがある。**
   修正版が major の先にしか無いとき（親が古い major を要求している依存）に起きる。
-  誰が要求しているかを `package-lock.json` の逆引きで確かめる。
+  誰が要求しているかを `pnpm why` の逆引きで確かめる。
   ```bash
-  node -e '
-  const p=require("./package-lock.json").packages;
-  for (const [k,v] of Object.entries(p))
-    if (v.dependencies && v.dependencies[process.argv[1]])
-      console.log(k||"(root)", "->", v.dependencies[process.argv[1]], v.dev?"(dev)":"");
-  ' <パッケージ名>
+  pnpm why <パッケージ名>
   ```
 - 残るアラートについては、dev 依存か（ビルド時のみか）、攻撃者が入力を渡せるかを添え、
   **「許容して dismiss する／移行する／ignore を外す」の選択肢をユーザーに出す。** dismiss は勝手にしない。
@@ -219,7 +209,7 @@ git status -sb | head -3                      # 作業ツリーが元のまま�
 ```
 
 - 静的サーバなどを立てたなら、**PID で止める。** プロセス名での `pkill` は禁止。
-  `npm run dev` は `@cloudflare/vite-plugin` 経由で `workerd` を子プロセスに持つので、
+  `pnpm run dev` は `@cloudflare/vite-plugin` 経由で `workerd` を子プロセスに持つので、
   名前で殺すとユーザーの dev サーバまで巻き添えになる。
   ポートは dev（5173）と preview（4173）を避け、`ss -lptn 'sport = :<port>'` で PID を引き、
   自分が起動したものだけを `kill <pid>` する。
