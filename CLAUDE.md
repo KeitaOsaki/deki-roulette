@@ -5,13 +5,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev       # 開発サーバ起動 (http://localhost:5173)
-npm run build     # 本番ビルド (tsc + クライアント + SSR バンドル + プリレンダ)
-npm run preview   # ビルド結果のプレビュー (http://localhost:4173)
-npm run lint      # ESLint 実行
+pnpm run dev       # 開発サーバ起動 (http://localhost:5173)
+pnpm run build     # 本番ビルド (tsc + クライアント + SSR バンドル + プリレンダ)
+pnpm run preview   # ビルド結果のプレビュー (http://localhost:4173)
+pnpm run lint      # ESLint 実行
+pnpm test          # Vitest を 1 回実行 (CI と同じ)
+pnpm run test:watch # Vitest をウォッチモードで起動
 ```
 
-テストは未設定。
+テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
+(`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
+テストのファイルも `tsc -b` と ESLint の対象になる。`vitest` は `import` で明示し、グローバルには置かない。
+
+パッケージマネージャは pnpm。版は `package.json` の `packageManager` で固定し、CI は `pnpm/action-setup` がそこから読む。
+依存のライフサイクルスクリプトは `pnpm-workspace.yaml` の `allowBuilds` で依存ごとに許可を決める。現状は esbuild / workerd とも `false`
+（postinstall なしでバイナリは optionalDependencies から入る）。pnpm 11 は許可が未決の依存があると `pnpm install` を失敗させるので、
+依存を足して `ERR_PNPM_IGNORED_BUILDS` が出たら、スクリプトが要るか確かめてから `true` / `false` を書く。
 
 ## アーキテクチャ
 
@@ -72,8 +81,8 @@ npm run lint      # ESLint 実行
 クローラに本文を渡すため、ビルド時に React を静的 HTML へ焼き込んで `#root` に入れてある。
 JS が動く前から画面のテキストがすべて HTML にある。
 
-- `npm run build` は クライアントビルド → SSR バンドル (`dist-ssr/`) → `scripts/prerender.mjs` の順。焼き込む対象は `prerender.mjs` の `PAGES`。
-- `BUILD_TARGET=ssr` のときは `vite.config.ts` が `cloudflare()` を外す。SSR バンドルは Node で実行するため。
+- `pnpm run build` は クライアントビルド → SSR バンドル (`dist-ssr/`) → `scripts/prerender.mjs` の順。焼き込む対象は `prerender.mjs` の `PAGES`。
+- `BUILD_TARGET=ssr` のときと Vitest の実行中は `vite.config.ts` が `cloudflare()` を外す。どちらも Node で実行するため。
 - 表示言語とページを `window.location.pathname` から読むと SSR で落ちるので、`App` は `locale` と `page` を prop で受け取る。
   URL が唯一のソースである点は変わらない (`main.tsx` が `localeFromPath` / `pageFromPath` を呼ぶ)。
 - 焼き込むのは画面に出ている文言だけ。ステルス仕様のとおり `details` は閉じたまま、
@@ -133,4 +142,14 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 
 ### デプロイ
 
-`main` ブランチへの push で Cloudflare Pages が自動ビルド＆デプロイ（Connect to Git で連携）。
+既定ブランチは `develop`。PR は `develop` へ出し、`develop` へのマージではデプロイされない。
+
+`develop` → `main` の PR をマージすると、Cloudflare の Workers Builds が自動でビルド＆デプロイする
+（Connect to Git で連携）。本番ブランチは `main` で、プレビュービルドは無効。
+Workers Builds の pnpm は既定が 10.x なので、ビルド変数 `PNPM_VERSION` を `packageManager` と同じ版にしておく。
+リリース PR は merge commit でマージする。squash にすると `develop` と `main` の履歴がずれ、次のリリースで差分が重複する。
+
+`main` は直接 push と削除ができず、PR が必須（ルールセット `main-protect`）。
+head が `develop` 以外の PR は `Release guard`（`.github/workflows/release-guard.yml` のジョブ `develop-only`）が失敗させ、
+このチェックは `main` の必須チェックになっている。
+`develop` は削除できない（`develop-protect`）。リリース PR の head が `develop` で、マージ後のブランチ自動削除に巻き込まれるため。

@@ -1,0 +1,5 @@
+# esbuild / workerd の postinstall はバイナリの検証だけで、実体は optionalDependencies から入る。
+# ライフサイクルスクリプトは実行させない。許可を決めていない依存が増えると install が失敗する。
+allowBuilds:
+  esbuild: false
+  workerd: false

@@ -46,6 +46,7 @@
 | 言語 | TypeScript 5.7 |
 | ビルドツール | Vite 6 |
 | スタイリング | Tailwind CSS 3 |
+| テスト | Vitest 5 |
 | CI/CD | Cloudflare Pages (Connect to Git) |
 | ホスティング | Cloudflare Pages |
 
@@ -53,39 +54,43 @@
 
 ### 前提
 
-- Node.js 18 以上
-- npm
+- Node.js 22.12 以上
+- pnpm 11（`packageManager` に版を固定してある。Corepack か `pnpm/action-setup` で入る）
 
 ### 手順
 
 ```bash
 # 依存関係のインストール
-npm install
+pnpm install
 
 # 開発サーバの起動 (http://localhost:5173)
-npm run dev
+pnpm run dev
 ```
 
 ### その他のコマンド
 
 ```bash
 # 本番ビルド
-npm run build
+pnpm run build
 
 # ビルド結果のプレビュー (http://localhost:4173)
-npm run preview
+pnpm run preview
 
 # Lint
-npm run lint
+pnpm run lint
+
+# テスト (Vitest)
+pnpm test
 ```
 
 ## デプロイ
 
 公開 URL: https://roulette.basekeita.com/
 
-`main` ブランチへのプッシュで Cloudflare Pages が自動的にビルド＆デプロイします。
+`develop` → `main` のマージで Cloudflare の Workers Builds が自動的にビルド＆デプロイします。`develop` へのマージではデプロイされません。
 
 | 設定項目 | 値 |
 |---|---|
-| Build command | `npm run build` |
+| Build command | `pnpm run build` |
 | Build output directory | `dist` |
+| `PNPM_VERSION` (ビルド変数) | `package.json` の `packageManager` と同じ版 |
