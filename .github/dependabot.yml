@@ -7,9 +7,6 @@ updates:
       day: monday
       timezone: Asia/Tokyo
     ignore:
-      # 6 系は vite 8 が必須。vite を上げるときに外す
-      - dependency-name: "@vitejs/plugin-react"
-        update-types: ["version-update:semver-major"]
       # 4 系は PostCSS プラグインが別パッケージになり、設定の移行が要る。移行するときに外す
       - dependency-name: "tailwindcss"
         update-types: ["version-update:semver-major"]
