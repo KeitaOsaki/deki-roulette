@@ -83,7 +83,7 @@ npm run lint
 
 公開 URL: https://roulette.basekeita.com/
 
-`main` ブランチへのプッシュで Cloudflare Pages が自動的にビルド＆デプロイします。
+`develop` → `main` のマージで Cloudflare の Workers Builds が自動的にビルド＆デプロイします。`develop` へのマージではデプロイされません。
 
 | 設定項目 | 値 |
 |---|---|
