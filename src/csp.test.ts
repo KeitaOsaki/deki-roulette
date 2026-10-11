@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
@@ -37,11 +37,15 @@ function loadRules(): Rule[] {
   return parseHeaders(readFileSync(headersPath, 'utf8'))
 }
 
-function loadCsp(): Map<string, string[]> {
-  const rule = loadRules().find((r) => r.path === '/*')
+function cspOf(rules: Rule[]): Map<string, string[]> {
+  const rule = rules.find((r) => r.path === '/*')
   const value = rule?.headers.get('Content-Security-Policy')
   if (value === undefined) throw new Error('/* の CSP 行が見つからない')
   return parseCsp(value)
+}
+
+function loadCsp(): Map<string, string[]> {
+  return cspOf(loadRules())
 }
 
 const ADS_FRAME = [
@@ -62,13 +66,45 @@ describe('CSP の style 系ディレクティブ', () => {
   })
 
   it("style-src-elem があれば 'unsafe-inline' を含まない", () => {
-    const elem = loadCsp().get('style-src-elem')
-    if (elem !== undefined) expect(elem).not.toContain("'unsafe-inline'")
+    const csp = loadCsp()
+    // style-src-elem が無いとブラウザは <style> 要素に style-src を当てる
+    const elem = csp.get('style-src-elem') ?? csp.get('style-src')
+    expect(elem).toBeDefined()
+    expect(elem).not.toContain("'unsafe-inline'")
   })
 
-  it('CSP 行が無い入力は失敗する', () => {
-    const rules = parseHeaders('/*\n  X-Frame-Options: DENY\n')
-    expect(rules[0].headers.get('Content-Security-Policy')).toBeUndefined()
+  it('CSP 行が見つからなければ失敗する', () => {
+    expect(() => cspOf(parseHeaders('/*\n  X-Frame-Options: DENY\n'))).toThrow(
+      '/* の CSP 行が見つからない',
+    )
+    expect(() => cspOf(parseHeaders('/assets/*\n  Content-Security-Policy: default-src \'self\'\n'))).toThrow(
+      '/* の CSP 行が見つからない',
+    )
+  })
+})
+
+describe('テストの実行環境', () => {
+  it('pnpm test で新しいテストと既存のテストがすべて通る', () => {
+    const pkg = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8')) as {
+      scripts: Record<string, string>
+    }
+    expect(pkg.scripts.test).toBe('vitest run')
+    expect(existsSync(fileURLToPath(new URL('../vitest.config.ts', import.meta.url)))).toBe(false)
+    const viteConfig = readFileSync(fileURLToPath(new URL('../vite.config.ts', import.meta.url)), 'utf8')
+    expect(viteConfig).toContain('include: ["src/**/*.test.{ts,tsx}"]')
+    for (const rel of [
+      '../public/_headers',
+      '../public/app/privacy/index.html',
+      '../public/app/privacy/style.css',
+      './csp.test.ts',
+      './static-html.test.ts',
+      './shuffle.test.ts',
+      './items.test.ts',
+    ]) {
+      expect(existsSync(fileURLToPath(new URL(rel, import.meta.url))), rel).toBe(true)
+    }
+    const csp = loadCsp()
+    expect(csp.get('style-src-elem') ?? csp.get('style-src')).not.toContain("'unsafe-inline'")
   })
 })
 

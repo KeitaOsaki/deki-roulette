@@ -70,6 +70,9 @@ describe('style 要素と style 属性の不在', () => {
 
   it('調べる対象が 7 件以上ある', () => {
     expect(targets.length).toBeGreaterThanOrEqual(7)
+    expect(targets).toEqual(expect.arrayContaining([...ENTRIES, 'public/app/privacy/index.html']))
+    const offenders = targets.filter((rel) => /<style[\s>]|\sstyle\s*=/i.test(read(rel)))
+    expect(offenders).toEqual([])
   })
 
   it.each(targets)('%s に <style も style= もない', (rel) => {
