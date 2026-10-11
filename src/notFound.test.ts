@@ -42,13 +42,12 @@ const PAGES = [
 describe("AC1: wrangler.jsonc @issue-26 @ac-1", () => {
   const raw = read("wrangler.jsonc");
 
-  it("コメントを除いて JSON として読める", () => {
-    expect(() => JSON.parse(stripJsonComments(raw))).not.toThrow();
-  });
-
-  it("assets.not_found_handling が 404-page", () => {
-    const config = JSON.parse(stripJsonComments(raw));
-    expect(config.assets.not_found_handling).toBe("404-page");
+  it("コメントを除いて JSON として読め、assets の未知パスの扱いが 404-page", () => {
+    let config: { assets?: { not_found_handling?: string } } = {};
+    expect(() => {
+      config = JSON.parse(stripJsonComments(raw));
+    }).not.toThrow();
+    expect(config.assets?.not_found_handling).toBe("404-page");
   });
 
   it("single-page-application の文字列が残っていない", () => {
@@ -124,7 +123,10 @@ describe("AC5: 禁止語 @issue-26 @ac-5", () => {
 });
 
 describe("AC6: sitemap.xml @issue-26 @ac-6", () => {
-  it("404 を含む loc がない", () => {
+  it("404 ページは public にあるが、404 を含む loc はない", () => {
+    for (const { path } of PAGES) {
+      expect(exists(path)).toBe(true);
+    }
     const locs = [...read("public/sitemap.xml").matchAll(/<loc>([^<]*)<\/loc>/g)];
     expect(locs.length).toBeGreaterThan(0);
     for (const [, url] of locs) {
@@ -134,20 +136,17 @@ describe("AC6: sitemap.xml @issue-26 @ac-6", () => {
 });
 
 describe("AC7: pnpm test での実行 @issue-26 @ac-7", () => {
-  it("pnpm test が vitest run を呼ぶ", () => {
+  it("pnpm test の vitest run がこのファイルを拾い、確かめる対象の 404.html がそろっている", () => {
     const pkg = JSON.parse(read("package.json"));
     expect(pkg.scripts.test).toBe("vitest run");
-  });
-
-  it("vite.config.ts の test.include が src 配下のテストを拾う", () => {
     expect(read("vite.config.ts")).toMatch(
       /include:\s*\[\s*"src\/\*\*\/\*\.test\.\{ts,tsx\}"\s*\]/
     );
-  });
-
-  it("このファイルは vitest を import で明示する", () => {
     expect(read("src/notFound.test.ts")).toMatch(
       /^import\s*\{[^}]*\bdescribe\b[^}]*\bexpect\b[^}]*\bit\b[^}]*\}\s*from\s*"vitest";$/m
     );
+    for (const { path } of PAGES) {
+      expect(exists(path)).toBe(true);
+    }
   });
 });
