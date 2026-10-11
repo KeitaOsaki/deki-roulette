@@ -123,7 +123,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - 日本語版の `<title>` / `og:title` / `twitter:title` は「デキレーレット｜無料で使えるインチキルーレットアプリ」、
   `<h1>` はブランド名だけの「デキレーレット」。
 - 順番決めの `<title>` は日本語版が「順番決め｜無料のランダム並べ替えツール｜デキレーレット」、`<h1>` は「順番決め」。
-- 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
+- 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブラウザのタブバーは画面共有に映るので、英語版の title を一般語にしている。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
 - どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
 - プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
 - アクセス解析は Cloudflare Web Analytics。ビーコンの `<script>` は 6 つのエントリ HTML に直書きしてあり、CSP の `script-src` / `connect-src` にある `cloudflareinsights` はそのため。Cookie もブラウザの保存領域も使わない。
