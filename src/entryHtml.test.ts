@@ -31,47 +31,47 @@ const markdownSection = (markdown: string, heading: string): string => {
 }
 
 describe('AC1 @issue-30 @ac-1: エントリ HTML に画面共有への言及が残っていない', () => {
-  it.each(ENTRY_FILES)('%s を読める', (path) => {
-    expect(readRepoFile(path).length).toBeGreaterThan(0)
-  })
-
-  it.each(ENTRY_FILES)('%s に「タブバーは画面共有」が含まれない', (path) => {
-    expect(readRepoFile(path)).not.toContain('タブバーは画面共有')
-  })
-
-  it('英語版の title は一般語で始まる', () => {
+  it('6 つのエントリ HTML を読めて、どれにも「タブバーは画面共有」が含まれず、英語版の title は一般語で始まる', () => {
+    const htmls = ENTRY_FILES.map((path) => [path, readRepoFile(path)] as const)
+    for (const [, html] of htmls) {
+      expect(html.length).toBeGreaterThan(0)
+    }
+    expect(htmls.filter(([, html]) => html.includes('タブバーは画面共有')).map(([path]) => path)).toEqual([])
     expect(readRepoFile('en/index.html')).toMatch(/<title>Roulette/)
     expect(readRepoFile('en/order/index.html')).toMatch(/<title>Random Order/)
   })
 })
 
 describe('AC2 @issue-30 @ac-2: エントリ HTML の HTML コメントは許可リストだけ', () => {
-  it.each(ENTRY_FILES)('%s の HTML コメントは許可リストだけ', (path) => {
-    expect(findDisallowedComments(readRepoFile(path))).toEqual([])
-  })
-
-  it('複数行にまたがるコメントも取り出す', () => {
-    const html = '<head>\n<!-- 一行目\n     二行目 -->\n<title>x</title>'
-    expect(extractComments(html)).toEqual(['一行目\n     二行目'])
-  })
-
-  it('許可リストにないコメントを違反として返す', () => {
-    const html = '<!-- Cloudflare Web Analytics --><!-- 余計なコメント -->'
-    expect(findDisallowedComments(html)).toEqual(['余計なコメント'])
-  })
-
-  it('コメントがなければ違反を返さない', () => {
+  it('検査関数は複数行のコメントも取り出して違反を返し、6 つのエントリ HTML には違反がない', () => {
+    const multiLine = '<head>\n<!-- 一行目\n     二行目 -->\n<title>x</title>'
+    expect(extractComments(multiLine)).toEqual(['一行目\n     二行目'])
+    expect(findDisallowedComments(multiLine)).toEqual(['一行目\n     二行目'])
+    expect(
+      findDisallowedComments('<!-- Cloudflare Web Analytics --><!-- 余計なコメント --><!-- End Cloudflare Web Analytics -->'),
+    ).toEqual(['余計なコメント'])
     expect(findDisallowedComments('<p>hello</p>')).toEqual([])
+
+    const violations = ENTRY_FILES.flatMap((path) =>
+      findDisallowedComments(readRepoFile(path)).map((comment) => `${path}: ${comment}`),
+    )
+    expect(violations).toEqual([])
   })
 })
 
-describe('AC3 @issue-30 @ac-3: コメント検査が pnpm test で走る', () => {
-  it('pnpm test は vitest run で、検査ファイルと既存テストが src/ にある', () => {
+describe('AC3 @issue-30 @ac-3: コメント検査が pnpm test で走って通る', () => {
+  it('pnpm test は src/ の検査ファイルと既存テストを vitest run で走らせ、エントリ HTML は AC1・AC2 の検査に通る', () => {
     const pkg = JSON.parse(readRepoFile('package.json')) as { scripts: Record<string, string> }
     expect(pkg.scripts.test).toBe('vitest run')
     for (const path of ['src/entryHtml.test.ts', 'src/items.test.ts', 'src/shuffle.test.ts']) {
       expect(existsSync(repoPath(path))).toBe(true)
     }
+
+    const failing = ENTRY_FILES.filter((path) => {
+      const html = readRepoFile(path)
+      return html.includes('タブバーは画面共有') || findDisallowedComments(html).length > 0
+    })
+    expect(failing).toEqual([])
   })
 })
 
