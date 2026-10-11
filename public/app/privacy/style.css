@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  background: #17111f;
+  color: #f5efe6;
+  font-family: ui-rounded, "Hiragino Maru Gothic ProN", "Segoe UI Variable Display", "Hiragino Sans", system-ui, sans-serif;
+  line-height: 1.7;
+}
+main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 3rem 1rem 4rem;
+}
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+}
+h2 {
+  margin: 2rem 0 0.5rem;
+  font-size: 1.125rem;
+  color: #ffc94a;
+}
+p,
+ul {
+  margin: 0 0 0.75rem;
+  color: #d9d0e3;
+}
+ul {
+  padding-left: 1.25rem;
+}
+a {
+  color: #ffc94a;
+}

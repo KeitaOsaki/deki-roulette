@@ -152,6 +152,8 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 
 `public/_headers` に CSP と各種セキュリティヘッダを定義。ビルド時に `dist/_headers` へコピーされ、Cloudflare の静的アセット配信が適用する。外部スクリプトを追加する場合は `script-src` / `connect-src` の更新が必要。AdSense のため `script-src` / `frame-src` / `connect-src` に Google の広告ドメインを並べ、広告画像の配信元は固定できないので `img-src` は `https:` を許可している。
 
+`style-src` は `'self'` だけで、`<style>` 要素の注入は許さない。React の `style` 属性（スライスの色や回転など）のために `style-src-attr 'unsafe-inline'` だけを足してある。そのため `public/` 配下を含む HTML には `<style>` 要素も `style=` 属性も書かない。CSS は外部ファイルに置く（`/app/privacy/` は `style.css`）。`src/csp.test.ts` と `src/static-html.test.ts` がこれを守る。
+
 #### HTTPS 専用化
 
 `basekeita.com` ゾーン全体を HTTPS 専用にしてある。リポジトリの外（Cloudflare ダッシュボード）にある設定が半分を占めるので、変えるときは次を崩さない。
