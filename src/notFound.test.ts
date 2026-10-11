@@ -39,7 +39,7 @@ const PAGES = [
   { path: "public/en/404.html", lang: "en", home: "/en/", order: "/en/order/" },
 ] as const;
 
-describe("AC1: wrangler.jsonc", () => {
+describe("AC1: wrangler.jsonc @issue-26 @ac-1", () => {
   const raw = read("wrangler.jsonc");
 
   it("コメントを除いて JSON として読める", () => {
@@ -56,7 +56,7 @@ describe("AC1: wrangler.jsonc", () => {
   });
 });
 
-describe("AC2: 日本語版 404.html", () => {
+describe("AC2: 日本語版 404.html @issue-26 @ac-2", () => {
   it("ファイルが存在する", () => {
     expect(exists("public/404.html")).toBe(true);
   });
@@ -70,7 +70,7 @@ describe("AC2: 日本語版 404.html", () => {
   });
 });
 
-describe("AC3: 英語版 404.html", () => {
+describe("AC3: 英語版 404.html @issue-26 @ac-3", () => {
   it("ファイルが存在する", () => {
     expect(exists("public/en/404.html")).toBe(true);
   });
@@ -90,7 +90,7 @@ describe("AC3: 英語版 404.html", () => {
   });
 });
 
-describe.each(PAGES)("AC4/AC5: $path", ({ path }) => {
+describe.each(PAGES)("AC4: $path @issue-26 @ac-4", ({ path }) => {
   it("script 要素を含まない", () => {
     expect(read(path)).not.toMatch(/<script\b/i);
   });
@@ -98,7 +98,9 @@ describe.each(PAGES)("AC4/AC5: $path", ({ path }) => {
   it("外部オリジンのリソースを参照しない", () => {
     expect(read(path)).not.toMatch(/\b(?:src|href)\s*=\s*["']?\s*https?:\/\//i);
   });
+});
 
+describe.each(PAGES)("AC5: $path @issue-26 @ac-5", ({ path }) => {
   it("meta robots noindex を持つ", () => {
     expect(read(path)).toMatch(
       /<meta\s+name="robots"\s+content="noindex"\s*\/?>/i
@@ -106,7 +108,7 @@ describe.each(PAGES)("AC4/AC5: $path", ({ path }) => {
   });
 });
 
-describe("AC5: 禁止語", () => {
+describe("AC5: 禁止語 @issue-26 @ac-5", () => {
   it("日本語版に「当たり」「必ず」「長押し」「仕込」が出ない", () => {
     const html = read("public/404.html");
     for (const word of ["当たり", "必ず", "長押し", "仕込"]) {
@@ -121,12 +123,31 @@ describe("AC5: 禁止語", () => {
   });
 });
 
-describe("AC6: sitemap.xml", () => {
+describe("AC6: sitemap.xml @issue-26 @ac-6", () => {
   it("404 を含む loc がない", () => {
     const locs = [...read("public/sitemap.xml").matchAll(/<loc>([^<]*)<\/loc>/g)];
     expect(locs.length).toBeGreaterThan(0);
     for (const [, url] of locs) {
       expect(url).not.toContain("404");
     }
+  });
+});
+
+describe("AC7: pnpm test での実行 @issue-26 @ac-7", () => {
+  it("pnpm test が vitest run を呼ぶ", () => {
+    const pkg = JSON.parse(read("package.json"));
+    expect(pkg.scripts.test).toBe("vitest run");
+  });
+
+  it("vite.config.ts の test.include が src 配下のテストを拾う", () => {
+    expect(read("vite.config.ts")).toMatch(
+      /include:\s*\[\s*"src\/\*\*\/\*\.test\.\{ts,tsx\}"\s*\]/
+    );
+  });
+
+  it("このファイルは vitest を import で明示する", () => {
+    expect(read("src/notFound.test.ts")).toMatch(
+      /^import\s*\{[^}]*\bdescribe\b[^}]*\bexpect\b[^}]*\bit\b[^}]*\}\s*from\s*"vitest";$/m
+    );
   });
 });
