@@ -101,6 +101,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 
 ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`、プライバシーポリシーが `/privacy/` と `/en/privacy/`。6 つとも独立した静的 HTML で、`vite.config.ts` の `build.rollupOptions.input` に並べてある。JS バンドルは共通で、react-router は入れない。
 
+- 未知のパスは `wrangler.jsonc` の `assets.not_found_handling: "404-page"` で 404 を返す。配るのは `public/404.html`（日本語）と `public/en/404.html`（英語。`/en/` 配下の未知パスにはこちらが最寄りとして選ばれる）。React・スクリプト・外部リソースを使わない静的 HTML で、`noindex`、sitemap には載せない。隠し操作を示唆する語は置かない。
 - `/app/privacy/` は iOS アプリ用のプライバシーポリシーで、`public/app/privacy/index.html` をそのまま配る。React・プリレンダ・`vite.config.ts` の `input` のどれも通らず、`noindex` で sitemap にも載せない。内容はアプリの実態（通信なし・解析なし・広告なし）で、Web 版の `privacySections` とは別に保つ。
 - 表示言語もページも URL だけで決まる（`localeFromPath` / `pageFromPath`）。`navigator.language` は表示の決定に使わない。焼き込んだ HTML と画面が食い違わないため。
 - 言語切替とページ間の移動はステートの切替ではなく `<a href>` での遷移。行き先は `PAGE_PATHS` が唯一の定義。言語を切り替えても同じページに留まる。
@@ -122,7 +123,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - 日本語版の `<title>` / `og:title` / `twitter:title` は「デキレーレット｜無料で使えるインチキルーレットアプリ」、
   `<h1>` はブランド名だけの「デキレーレット」。
 - 順番決めの `<title>` は日本語版が「順番決め｜無料のランダム並べ替えツール｜デキレーレット」、`<h1>` は「順番決め」。
-- 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
+- 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブラウザのタブバーは画面共有に映るので、英語版の title を一般語にしている。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
 - どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
 - プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
 - アクセス解析は Cloudflare Web Analytics。ビーコンの `<script>` は 6 つのエントリ HTML に直書きしてあり、CSP の `script-src` / `connect-src` にある `cloudflareinsights` はそのため。Cookie もブラウザの保存領域も使わない。
