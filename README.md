@@ -55,32 +55,32 @@
 ### 前提
 
 - Node.js 22.12 以上
-- npm
+- pnpm 11（`packageManager` に版を固定してある。Corepack か `pnpm/action-setup` で入る）
 
 ### 手順
 
 ```bash
 # 依存関係のインストール
-npm install
+pnpm install
 
 # 開発サーバの起動 (http://localhost:5173)
-npm run dev
+pnpm run dev
 ```
 
 ### その他のコマンド
 
 ```bash
 # 本番ビルド
-npm run build
+pnpm run build
 
 # ビルド結果のプレビュー (http://localhost:4173)
-npm run preview
+pnpm run preview
 
 # Lint
-npm run lint
+pnpm run lint
 
 # テスト (Vitest)
-npm test
+pnpm test
 ```
 
 ## デプロイ
@@ -91,5 +91,6 @@ npm test
 
 | 設定項目 | 値 |
 |---|---|
-| Build command | `npm run build` |
+| Build command | `pnpm run build` |
 | Build output directory | `dist` |
+| `PNPM_VERSION` (ビルド変数) | `package.json` の `packageManager` と同じ版 |
