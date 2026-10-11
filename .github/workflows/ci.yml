@@ -2,6 +2,9 @@ name: CI
 
 on:
   pull_request:
+  # PR の CI はマージ前の head で動く。マージ後の develop は別に確かめる
+  push:
+    branches: [develop]
 
 permissions:
   contents: read
