@@ -34,14 +34,14 @@ describe('AC3: app/privacy の静的 HTML @issue-27 @ac-3', () => {
     expect(html).not.toMatch(/<style[\s>]/i)
   })
 
-  it('<head> に style.css への link がある', () => {
+  it('app/privacy の head に style.css の link がある（<head> に style.css への link がある）', () => {
     const head = /<head>([\s\S]*?)<\/head>/i.exec(html)?.[1] ?? ''
     expect(head).toMatch(
       /<link\s+rel="stylesheet"\s+href="\/app\/privacy\/style\.css"\s*\/?>/,
     )
   })
 
-  it('style.css が旧 <style> の全ルールを持つ', () => {
+  it('style.css に元のルールがすべてある（旧 <style> の全ルールを持つ）', () => {
     const css = read('public/app/privacy/style.css')
     expect(css.trim()).not.toBe('')
     const compact = css.replace(/\s+/g, ' ')
@@ -81,13 +81,13 @@ describe('AC6: 404 ページの外部 CSS @issue-27 @ac-6', () => {
   })
 
   it.each(['public/404.html', 'public/en/404.html'])(
-    '%s の <head> に絶対パスの 404.css への link がある',
+    '404 の head に 404.css の link がある・404.css の href が絶対パス: %s の <head> に絶対パスの 404.css への link がある',
     (rel) => {
       expect(stylesheetHrefs(read(rel))).toContain('/404.css')
     },
   )
 
-  it('404.css が旧 <style> の body と a のルールを持つ', () => {
+  it('404.css に元の body と a のルールがある（404.css が旧 <style> の body と a のルールを持つ）', () => {
     const css = read('public/404.css')
     expect(css.trim()).not.toBe('')
     const compact = css.replace(/\s+/g, ' ')
@@ -122,7 +122,7 @@ describe('AC4: style 要素と style 属性の不在 @issue-27 @ac-4', () => {
     expect(offenders).toEqual([])
   })
 
-  it.each(targets)('%s に <style も style= もない', (rel) => {
+  it.each(targets)('style 要素と style 属性がない: %s に <style も style= もない', (rel) => {
     const html = read(rel)
     expect(html).not.toMatch(/<style[\s>]/i)
     expect(html).not.toMatch(/\sstyle\s*=/i)

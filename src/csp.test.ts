@@ -57,15 +57,15 @@ const ADS_FRAME = [
 ]
 
 describe('AC1: CSP の style 系ディレクティブ @issue-27 @ac-1', () => {
-  it("style-src は 'self' だけ", () => {
+  it("style-src が self だけ（style-src は 'self' だけ）", () => {
     expect(loadCsp().get('style-src')).toEqual(["'self'"])
   })
 
-  it("style-src-attr は 'unsafe-inline' だけ", () => {
+  it("style-src-attr が unsafe-inline だけ（style-src-attr は 'unsafe-inline' だけ）", () => {
     expect(loadCsp().get('style-src-attr')).toEqual(["'unsafe-inline'"])
   })
 
-  it("style-src-elem があれば 'unsafe-inline' を含まない", () => {
+  it("style-src-elem が unsafe-inline を含まない（style-src-elem があれば 'unsafe-inline' を含まない）", () => {
     const csp = loadCsp()
     // style-src-elem が無いとブラウザは <style> 要素に style-src を当てる
     const elem = csp.get('style-src-elem') ?? csp.get('style-src')
@@ -73,7 +73,7 @@ describe('AC1: CSP の style 系ディレクティブ @issue-27 @ac-1', () => {
     expect(elem).not.toContain("'unsafe-inline'")
   })
 
-  it('CSP 行が見つからなければ失敗する', () => {
+  it('CSP 行がなければ失敗する（CSP 行が見つからなければ失敗する）', () => {
     expect(() => cspOf(parseHeaders('/*\n  X-Frame-Options: DENY\n'))).toThrow(
       '/* の CSP 行が見つからない',
     )
