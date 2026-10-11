@@ -1,10 +1,18 @@
 name: CI
 
 on:
+  # 変更が文書だけなら workflow ごと動かさない。lint / test / build を必須チェックにすると、
+  # skip した PR は報告待ちのまま止まるので、必須にするときはこの除外を外してジョブ側で分岐する
   pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - LICENSE
   # PR の CI はマージ前の head で動く。マージ後の develop は別に確かめる
   push:
     branches: [develop]
+    paths-ignore:
+      - '**/*.md'
+      - LICENSE
 
 permissions:
   contents: read
