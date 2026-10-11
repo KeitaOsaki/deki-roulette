@@ -16,7 +16,7 @@ pnpm run deploy    # build してから wrangler deploy
 
 `deploy` は手元から本番を直接更新する。リリースは `main` へのマージ（Workers Builds）で出すので、通常は使わない。
 
-Node.js は 22.12 以上の偶数系（Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
+Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満を、Vitest 5 の `engines` が 23 と 25 を外している）。CI は 24。
 
 テストは Vitest。`src/` 配下の `*.test.ts(x)` だけを対象にする。Node 環境で走らせる純粋なロジック
 (`shuffle.ts` / `items.ts`) の検証が中心で、DOM を使う検証は未導入。
@@ -149,11 +149,11 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 
 `basekeita.com` ゾーン全体を HTTPS 専用にしてある。リポジトリの外（Cloudflare ダッシュボード）にある設定が半分を占めるので、変えるときは次を崩さない。
 
-- HSTS は Cloudflare の SSL/TLS → エッジ証明書で、max-age 12 か月・サブドメインを含める・プリロードの 3 つをオンにしている。apex の転送応答と `tabi-gacha.basekeita.com` はこのリポジトリの配信物を通らないので、`_headers` だけでは付かない。
-- `_headers` の HSTS はゾーンの設定と同じ値にしておく。Cloudflare がゾーンの値で置き換えるので二重にならない。値を変えるときは両方を直す。
-- apex からの転送は Redirect Rule「root to roulette」（`http.host in {"basekeita.com" "www.basekeita.com"} and ssl`）。`ssl` を外すと HTTP が `https://roulette.basekeita.com/` へ直接飛び、最初の転送先が同一ホストの HTTPS でなくなって、hstspreload.org の要件を満たさなくなる。
+- HSTS は Cloudflare の SSL/TLS → エッジ証明書で、max-age 12 か月とサブドメインを含めるをオンに、プリロードをオフにしている。apex の転送応答はこのリポジトリの配信物を通らないので、`_headers` だけでは付かない。
+- `_headers` の HSTS はゾーンの設定と同じ値（`max-age=31536000; includeSubDomains`）にしておく。ゾーンの値で置き換わるので、応答のヘッダは 1 本になる。値を変えるときは両方を直す。
+- apex からの転送は Redirect Rule「root to roulette」（`http.host in {"basekeita.com" "www.basekeita.com"} and ssl`）。`ssl` を外すと HTTP が `https://roulette.basekeita.com/` へ直接飛び、apex の HTTPS 応答を通らないので、ブラウザが apex の HSTS を受け取れない。
 - `includeSubDomains` のため、`*.basekeita.com` のホストは 2 階層目以降（`a.b.basekeita.com`）も含めて、すべて HTTPS で応答しなければならない。サブドメインを足す前に、HTTPS で応答することを確かめる。
-- `preload` は付けたままだが、hstspreload.org へは申請していない。Chrome や Safari は HTTP の移動を自動で HTTPS に上げるので、申請で足される利点は小さく、載ると外すのに数か月かかる。`preload` を付けている間は、フォームから第三者も申請できる（所有者の確認は無い）。申請する前に、`https://hstspreload.org/api/v2/preloadable?domain=basekeita.com` が `errors` を空で返すことを確かめる。
+- `preload` は付けない。付けると hstspreload.org の申請の対象になるが、Chrome や Safari は HTTP の移動を自動で HTTPS に上げるので、申請で足される利点は小さく、載ると外すのに数か月かかる。ゾーンの HSTS のプリロードも、`_headers` の `preload` も、オフのままにする。
 
 ### パスエイリアス
 
@@ -182,6 +182,6 @@ head が `develop` 以外の PR は `Release guard`（`.github/workflows/release
 `.github/workflows/ci.yml` は PR と `develop` への push で `lint` / `test` / `build` を matrix で並列に走らせる（Node 24、`pnpm install --frozen-lockfile`）。
 型検査だけのジョブは無く、`build` の先頭の `tsc -b` が兼ねる。1 つ落ちても残りは止めない（`fail-fast: false`）。
 
-Dependabot は npm と GitHub Actions を毎週月曜（JST）に見る。`@vitejs/plugin-react` と `tailwindcss` のメジャー更新は無視する設定で、外す条件は `.github/dependabot.yml` のコメントにある。
+Dependabot は npm と GitHub Actions を毎週月曜（JST）に見る。`tailwindcss` のメジャー更新は無視する設定で、外す条件は `.github/dependabot.yml` のコメントにある。
 
 リリース PR の作成は `release-pr`、Dependabot の PR の精査は `dependabot-triage` のスキルが担う（`.claude/skills/`）。

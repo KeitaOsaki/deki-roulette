@@ -57,10 +57,10 @@
 |---|---|
 | フレームワーク | React 19 |
 | 言語 | TypeScript 5.7 |
-| ビルドツール | Vite 6 |
+| ビルドツール | Vite 8 |
 | スタイリング | Tailwind CSS 3 |
 | テスト | Vitest 5 |
-| リンタ | ESLint 9 (typescript-eslint) |
+| リンタ | ESLint 10 (typescript-eslint) |
 | パッケージマネージャ | pnpm 11 |
 | CI | GitHub Actions (lint / test / build) |
 | ホスティング・デプロイ | Cloudflare Workers の静的アセット配信 (Workers Builds) |
@@ -71,7 +71,7 @@
 
 ### 前提
 
-- Node.js 22.12 以上の偶数系（Vitest 5 が 23 と 25 を対象外にしている。CI は 24）
+- Node.js 22.13 以上の偶数系（ESLint 10 が 22.13 未満を、Vitest 5 が 23 と 25 を対象外にしている。CI は 24）
 - pnpm 11（`packageManager` に版を固定してある。Corepack か `pnpm/action-setup` で入る）
 
 ### 手順
