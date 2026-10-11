@@ -1,0 +1,27 @@
+name: Release guard
+
+on:
+  pull_request:
+    branches: [main]
+    # ベースの付け替えは edited で届く。既定の types に無く、develop 向けで作った PR を
+    # main に付け替えても必須チェックが報告されないまま止まる
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+jobs:
+  develop-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Require develop as the head branch
+        # head_ref はブランチ名をそのまま持つので、run に直接埋めずに env 経由で渡す
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          # fork に同名の develop があっても通らないよう、head のリポジトリも見る
+          if [ "$HEAD_REF" != "develop" ] || [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::main only accepts pull requests from develop in this repository (head: $HEAD_REPO:$HEAD_REF)"
+            exit 1
+          fi
