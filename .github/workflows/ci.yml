@@ -15,8 +15,15 @@ concurrency:
 
 jobs:
   check:
+    name: ${{ matrix.task }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      # どれが落ちたかを一度に見たいので、1 つ落ちても残りを止めない
+      fail-fast: false
+      matrix:
+        # build は tsc -b を先頭で走らせるので型検査も兼ねる
+        task: [lint, test, build]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -30,9 +37,4 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm run lint
-
-      - run: pnpm test
-
-      # build は tsc -b を先頭で走らせるので型検査も兼ねる
-      - run: pnpm run build
+      - run: pnpm run ${{ matrix.task }}

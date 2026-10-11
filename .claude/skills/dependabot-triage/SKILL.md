@@ -37,7 +37,7 @@ gh pr list --author "app/dependabot" --state open --limit 100 \
 
 ## 2. CI が通った PR
 
-CI（`.github/workflows/ci.yml`）は `pnpm install --frozen-lockfile` → `pnpm run lint` → `pnpm test` → `pnpm run build`。
+CI（`.github/workflows/ci.yml`）は `lint` / `test` / `build` の 3 ジョブ（matrix）で、それぞれ `pnpm install --frozen-lockfile` のあとに `pnpm run <ジョブ名>` を走らせる。
 `build` は `tsc -b` を先頭に走らせるので型検査も兼ね、SSR バンドルとプリレンダまで通る。
 
 ```bash
