@@ -182,6 +182,6 @@ head が `develop` 以外の PR は `Release guard`（`.github/workflows/release
 `.github/workflows/ci.yml` は PR と `develop` への push で `lint` / `test` / `build` を matrix で並列に走らせる（Node 24、`pnpm install --frozen-lockfile`）。
 型検査だけのジョブは無く、`build` の先頭の `tsc -b` が兼ねる。1 つ落ちても残りは止めない（`fail-fast: false`）。
 
-Dependabot は npm と GitHub Actions を毎週月曜（JST）に見る。`@vitejs/plugin-react` と `tailwindcss` のメジャー更新は無視する設定で、外す条件は `.github/dependabot.yml` のコメントにある。
+Dependabot は npm と GitHub Actions を毎週月曜（JST）に見る。`tailwindcss` のメジャー更新は無視する設定で、外す条件は `.github/dependabot.yml` のコメントにある。
 
 リリース PR の作成は `release-pr`、Dependabot の PR の精査は `dependabot-triage` のスキルが担う（`.claude/skills/`）。
