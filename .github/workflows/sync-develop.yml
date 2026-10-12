@@ -1,0 +1,31 @@
+name: Sync develop
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-develop
+
+jobs:
+  fast-forward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      # リリース PR の merge commit は main にしか無いので、develop を main へ進めて履歴を揃える。
+      # develop が先に進んでいたら fast-forward できず失敗にする。merge commit で解消すると、また差分が生まれる
+      - name: Fast-forward develop to main
+        run: |
+          if ! git merge --ff-only "$GITHUB_SHA"; then
+            echo "::error::develop has commits that main does not; fast-forward is not possible. Run 'git merge origin/main' on develop by hand"
+            exit 1
+          fi
+          git push origin develop

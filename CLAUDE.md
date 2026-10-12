@@ -172,6 +172,9 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 （Connect to Git で連携）。ビルドコマンドは `pnpm run build`、デプロイコマンドは `wrangler deploy`。本番ブランチは `main` で、プレビュービルドは無効。
 Workers Builds の pnpm は既定が 10.x なので、ビルド変数 `PNPM_VERSION` を `packageManager` と同じ版にしておく。
 リリース PR は merge commit でマージする。squash にすると `develop` と `main` の履歴がずれ、次のリリースで差分が重複する。
+merge commit は `main` にしか無いので、`main` への push で `Sync develop`（`.github/workflows/sync-develop.yml`）が `develop` を `main` へ fast-forward する。
+`GITHUB_TOKEN` の push なので `develop` の CI は走らない（木は直前の CI 済みの `develop` と同じ）。
+`develop` が先に進んでいて fast-forward できないときはジョブが失敗するので、手元で `develop` に `origin/main` をマージする。
 
 `main` は直接 push と削除ができず、PR が必須（ルールセット `main-protect`）。
 head が `develop` 以外の PR は `Release guard`（`.github/workflows/release-guard.yml` のジョブ `develop-only`）が失敗させ、
