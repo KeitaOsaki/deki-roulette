@@ -105,7 +105,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 
 ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`、プライバシーポリシーが `/privacy/` と `/en/privacy/`、使い方ガイドが `/guide/` と `/en/guide/`。すべて独立した静的 HTML で、`ROUTES` から `vite.config.ts` の `build.rollupOptions.input` を組む。JS バンドルは共通で、react-router は入れない。
 
-- 未知のパスは `wrangler.jsonc` の `assets.not_found_handling: "404-page"` で 404 を返す。配るのは `public/404.html`（日本語）と `public/en/404.html`（英語。`/en/` 配下の未知パスにはこちらが最寄りとして選ばれる）。React・スクリプト・外部リソースを使わない静的 HTML で、`noindex`、sitemap には載せない。隠し操作を示唆する語は置かない。
+- 未知のパスは `wrangler.jsonc` の `assets.not_found_handling: "404-page"` で 404 を返す。配るのは `public/404.html`（日本語）と `public/en/404.html`（英語。`/en/` 配下の未知パスにはこちらが最寄りとして選ばれる）。React・スクリプトを使わず、同一オリジンの CSS（`public/404.css`）だけを読む静的 HTML で、`noindex`、sitemap には載せない。隠し操作を示唆する語は置かない。
 - `/app/privacy/` は iOS アプリ用のプライバシーポリシーで、`public/app/privacy/index.html` をそのまま配る。React・プリレンダ・`vite.config.ts` の `input` のどれも通らず、`noindex` で sitemap にも載せない。内容はアプリの実態（通信なし・解析なし・広告なし）で、Web 版の `privacySections` とは別に保つ。
 - 表示言語もページも URL だけで決まる（`localeFromPath` / `pageFromPath`）。`navigator.language` は表示の決定に使わない。焼き込んだ HTML と画面が食い違わないため。
 - 言語切替とページ間の移動はステートの切替ではなく `<a href>` での遷移。行き先は `PAGE_PATHS` が唯一の定義。言語を切り替えても同じページに留まる。
@@ -151,6 +151,8 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 ### セキュリティヘッダ
 
 `public/_headers` に CSP と各種セキュリティヘッダを定義。ビルド時に `dist/_headers` へコピーされ、Cloudflare の静的アセット配信が適用する。外部スクリプトを追加する場合は `script-src` / `connect-src` の更新が必要。AdSense のため `script-src` / `frame-src` / `connect-src` に Google の広告ドメインを並べ、広告画像の配信元は固定できないので `img-src` は `https:` を許可している。
+
+`style-src` は `'self'` だけで、`<style>` 要素の注入は許さない。React の `style` 属性（スライスの色や回転など）のために `style-src-attr 'unsafe-inline'` だけを足してある。そのため `public/` 配下を含む HTML には `<style>` 要素も `style=` 属性も書かない。CSS は外部ファイルに置く（`/app/privacy/` は `style.css`）。`src/csp.test.ts` と `src/static-html.test.ts` がこれを守る。
 
 #### HTTPS 専用化
 
