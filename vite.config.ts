@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
 
 import { cloudflare } from "@cloudflare/vite-plugin";
+import { ROUTES, routeFile } from "./src/routes.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,14 +26,12 @@ export default defineConfig({
     ? {}
     : {
         rollupOptions: {
-          input: {
-            ja: resolve(__dirname, "index.html"),
-            en: resolve(__dirname, "en/index.html"),
-            jaOrder: resolve(__dirname, "order/index.html"),
-            enOrder: resolve(__dirname, "en/order/index.html"),
-            jaPrivacy: resolve(__dirname, "privacy/index.html"),
-            enPrivacy: resolve(__dirname, "en/privacy/index.html"),
-          },
+          input: Object.fromEntries(
+            ROUTES.map((route) => [
+              `${route.locale}-${route.page}`,
+              resolve(__dirname, routeFile(route)),
+            ])
+          ),
         },
       },
   test: {
