@@ -33,29 +33,22 @@ function stripJsonComments(source: string): string {
   return out;
 }
 
-const config: Record<string, unknown> & {
-  observability?: { enabled?: boolean };
-  assets?: { not_found_handling?: string };
-} = JSON.parse(stripJsonComments(raw));
+const config: unknown = JSON.parse(stripJsonComments(raw));
 
 describe("AC1: wrangler.jsonc に nodejs_compat がない @issue-31 @ac-1", () => {
   it("生の文字列に nodejs_compat が含まれない", () => {
     expect(raw).not.toContain("nodejs_compat");
   });
 
-  it("compatibility_flags キーがない", () => {
-    expect(config).not.toHaveProperty("compatibility_flags");
-  });
-
-  it("ほかのキーは変更前の値のまま", () => {
-    expect(config.$schema).toBe("node_modules/wrangler/config-schema.json");
-    expect(config.name).toBe("deki-roulette");
-    expect(config.compatibility_date).toBe("2025-09-27");
-    expect(config.observability?.enabled).toBe(true);
-    expect(config.assets?.not_found_handling).toBe("404-page");
-  });
-
-  it("main キーがない（アセット専用の構成）", () => {
-    expect(config).not.toHaveProperty("main");
+  // 完全一致で比べるので、compatibility_flags や main（Worker コード）が
+  // 残っている・足されている場合も、ほかのキーの値が変わった場合も落ちる。
+  it("compatibility_flags と main を持たず、ほかのキーは変更前の値のまま", () => {
+    expect(config).toStrictEqual({
+      $schema: "node_modules/wrangler/config-schema.json",
+      name: "deki-roulette",
+      compatibility_date: "2025-09-27",
+      observability: { enabled: true },
+      assets: { not_found_handling: "404-page" },
+    });
   });
 });
