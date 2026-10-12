@@ -1,3 +1,4 @@
+import GuidePage from "./pages/GuidePage";
 import OrderPage from "./pages/OrderPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import RoulettePage from "./pages/RoulettePage";
@@ -15,6 +16,8 @@ export default function App({ locale, page }: Props) {
       return <OrderPage locale={locale} />;
     case "privacy":
       return <PrivacyPage locale={locale} />;
+    case "guide":
+      return <GuidePage locale={locale} />;
     case "roulette":
       return <RoulettePage locale={locale} />;
   }

@@ -43,4 +43,18 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://roulette.basekeita.com/en/privacy/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://roulette.basekeita.com/privacy/" />
   </url>
+  <url>
+    <loc>https://roulette.basekeita.com/guide/</loc>
+    <lastmod>2026-10-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://roulette.basekeita.com/guide/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://roulette.basekeita.com/en/guide/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://roulette.basekeita.com/guide/" />
+  </url>
+  <url>
+    <loc>https://roulette.basekeita.com/en/guide/</loc>
+    <lastmod>2026-10-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://roulette.basekeita.com/guide/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://roulette.basekeita.com/en/guide/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://roulette.basekeita.com/guide/" />
+  </url>
 </urlset>
