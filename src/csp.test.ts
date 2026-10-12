@@ -72,7 +72,9 @@ describe('AC1: CSP の style 系ディレクティブ @issue-27 @ac-1', () => {
     expect(elem).toBeDefined()
     expect(elem).not.toContain("'unsafe-inline'")
   })
+})
 
+describe('回帰: CSP のパース', () => {
   it('CSP 行がなければ失敗する（CSP 行が見つからなければ失敗する）', () => {
     expect(() => cspOf(parseHeaders('/*\n  X-Frame-Options: DENY\n'))).toThrow(
       '/* の CSP 行が見つからない',

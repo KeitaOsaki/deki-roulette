@@ -70,7 +70,7 @@ function stylesheetHrefs(html: string): string[] {
   return [...head.matchAll(/<link\s+rel="stylesheet"\s+href="([^"]*)"\s*\/?>/gi)].map((m) => m[1])
 }
 
-describe('AC6: 404 ページの外部 CSS @issue-27 @ac-6', () => {
+describe('回帰: stylesheetHrefs', () => {
   it('stylesheetHrefs は相対パスの href をそのまま返す', () => {
     const relative = '<head><link rel="stylesheet" href="404.css" /></head>'
     expect(stylesheetHrefs(relative)).toEqual(['404.css'])
@@ -79,7 +79,9 @@ describe('AC6: 404 ページの外部 CSS @issue-27 @ac-6', () => {
       '/404.css',
     )
   })
+})
 
+describe('AC6: 404 ページの外部 CSS @issue-27 @ac-6', () => {
   it.each(['public/404.html', 'public/en/404.html'])(
     '404 の head に 404.css の link がある・404.css の href が絶対パス: %s の <head> に絶対パスの 404.css への link がある',
     (rel) => {
@@ -122,7 +124,15 @@ describe('AC4: style 要素と style 属性の不在 @issue-27 @ac-4', () => {
     expect(offenders).toEqual([])
   })
 
-  it.each(targets)('style 要素と style 属性がない: %s に <style も style= もない', (rel) => {
+  it.each(htmlUnder('public'))('style 要素と style 属性がない: %s に <style も style= もない', (rel) => {
+    const html = read(rel)
+    expect(html).not.toMatch(/<style[\s>]/i)
+    expect(html).not.toMatch(/\sstyle\s*=/i)
+  })
+})
+
+describe('回帰: 既にクリーンなページ', () => {
+  it.each(ENTRIES)('style 要素と style 属性がない: %s に <style も style= もない', (rel) => {
     const html = read(rel)
     expect(html).not.toMatch(/<style[\s>]/i)
     expect(html).not.toMatch(/\sstyle\s*=/i)
