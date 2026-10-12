@@ -6,7 +6,17 @@ import {
   SPIN_FALLBACK_MS,
 } from "../config";
 import { createId, normalizeLabel } from "../items";
+import { randomBelow } from "../shuffle";
 import type { Item } from "../types";
+
+/** 指定がなければ暗号論的乱数で当たりを選ぶ。指定先が見つからなければ -1。 */
+export function pickTargetIndex(
+  items: readonly Item[],
+  targetId: string | null
+): number {
+  if (targetId === null) return randomBelow(items.length);
+  return items.findIndex((item) => item.id === targetId);
+}
 
 export function useRoulette(
   createInitialItems: () => Item[],
@@ -75,10 +85,7 @@ export function useRoulette(
   const spin = useCallback(() => {
     if (!canSpin) return;
 
-    const targetIndex =
-      targetId !== null
-        ? items.findIndex((item) => item.id === targetId)
-        : Math.floor(Math.random() * items.length);
+    const targetIndex = pickTargetIndex(items, targetId);
     if (targetIndex === -1) return;
 
     const sliceAngle = 360 / items.length;

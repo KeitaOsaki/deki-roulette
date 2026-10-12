@@ -60,7 +60,7 @@ Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満�
 
 ### スピンの仕組み
 
-`useRoulette` の `spin()` が核心ロジック。`targetId` が設定されていればその項目のスライス角に収まるよう回転角を計算し、見た目はランダムでも結果を確定させる。完了検知はホイールの `transitionend`、`SPIN_FALLBACK_MS` のタイマーはバックグラウンドタブ等で発火しない場合の保険。
+`useRoulette` の `spin()` が核心ロジック。`targetId` が設定されていればその項目のスライス角に収まるよう回転角を計算し、見た目はランダムでも結果を確定させる。指定がないときの当たり選びは `randomBelow`（`crypto.getRandomValues`）で、演出用の角度は `Math.random`。完了検知はホイールの `transitionend`、`SPIN_FALLBACK_MS` のタイマーはバックグラウンドタブ等で発火しない場合の保険。
 
 ### 並べ替えの仕組み
 
@@ -172,6 +172,9 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 （Connect to Git で連携）。ビルドコマンドは `pnpm run build`、デプロイコマンドは `wrangler deploy`。本番ブランチは `main` で、プレビュービルドは無効。
 Workers Builds の pnpm は既定が 10.x なので、ビルド変数 `PNPM_VERSION` を `packageManager` と同じ版にしておく。
 リリース PR は merge commit でマージする。squash にすると `develop` と `main` の履歴がずれ、次のリリースで差分が重複する。
+merge commit は `main` にしか無いので、`main` への push で `Sync develop`（`.github/workflows/sync-develop.yml`）が `develop` を `main` へ fast-forward する。
+`GITHUB_TOKEN` の push なので `develop` の CI は走らない（木は直前の CI 済みの `develop` と同じ）。
+`develop` が先に進んでいて fast-forward できないときはジョブが失敗するので、手元で `develop` に `origin/main` をマージする。
 
 `main` は直接 push と削除ができず、PR が必須（ルールセット `main-protect`）。
 head が `develop` 以外の PR は `Release guard`（`.github/workflows/release-guard.yml` のジョブ `develop-only`）が失敗させ、
