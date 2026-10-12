@@ -29,13 +29,16 @@ Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満�
 
 ## アーキテクチャ
 
-**出来レーレット** — 結果をユーザが事前に指定できる抽選アプリ。ルーレット (`/`) と順番決め (`/order/`) の 2 画面とプライバシーポリシー (`/privacy/`) を、言語 × ページごとの静的 HTML で配る Vite の MPA 構成。
+**出来レーレット** — 結果をユーザが事前に指定できる抽選アプリ。ルーレット (`/`) と順番決め (`/order/`) の 2 画面、プライバシーポリシー (`/privacy/`)、使い方ガイド (`/guide/`) を、言語 × ページごとの静的 HTML で配る Vite の MPA 構成。
 
 - `src/config.ts` — スライス色・スピン時間・項目数上限などのドメイン定数。
 - `src/types.ts` — `Item` 型と、リストの行に出す印の `Mark` 型。
 - `src/items.ts` — 項目の ID 生成とラベル正規化。両画面で共有する。
 - `src/shuffle.ts` — Fisher-Yates と、指定された項目を先頭・末尾へ移す `arrange`。
-- `index.html` / `en/index.html` / `order/index.html` / `en/order/index.html` / `privacy/index.html` / `en/privacy/index.html` — 6 つのエントリ。ページ別・言語別のメタタグはここに書き分ける。
+- `index.html` / `en/index.html` / `order/index.html` / `en/order/index.html` / `privacy/index.html` / `en/privacy/index.html` — ツール画面と規約のエントリ。ページ別・言語別のメタタグはここに書き分ける。
+- `guide/index.html` / `en/guide/index.html` — 使い方ガイドのエントリ。`<title>`・description は `routes.ts` の `routeMeta` と一致させ、`routes.test.ts` が食い違いを落とす。
+- `src/routes.ts` — 静的に配る全ページ (`ROUTES`) の唯一の定義。`vite.config.ts` の `input`、プリレンダ、エントリ HTML の検査がここから組み立てる。
+- `src/guideMedia.ts` — 使い方ガイドに載せる画像・アニメーションの一覧と実寸。実体は `public/guide/media/`。
 - `src/i18n.ts` — 日英の文言テーブル、`Locale` / `Page` 型、言語とページから URL への対応。
 - `src/hooks/useRoulette.ts` — 項目・ターゲット・回転・結果のステートとスピンロジック。
 - `src/hooks/useOrder.ts` — 項目・先頭末尾の指定・並べ替え結果のステートと演出時間の計算。
@@ -44,10 +47,11 @@ Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満�
 - `src/hooks/useReducedMotion.ts` — `prefers-reduced-motion` の購読。
 - `src/App.tsx` — `page` prop で表示するページを選ぶだけ。
 - `src/pages/RoulettePage.tsx` / `src/pages/OrderPage.tsx` — 各画面の組み立て。表示言語は `locale` prop で受け取る。
-- `src/pages/PrivacyPage.tsx` — プライバシーポリシー。`PageFrame` は使わず、見出し・ルーレットへの戻りリンク・言語切替だけを持つ。本文は `i18n.ts` の `privacySections`。
+- `src/pages/PrivacyPage.tsx` / `GuidePage.tsx` — 読ませる文章のページ。`PageFrame` は使わず `ContentFrame` で組む。本文は `i18n.ts` の `privacySections` / `guideSections`。`GuidePage` は手順ごとに文章と画像を並べる。
+- `src/components/ContentFrame.tsx` — 上記ページの枠。見出し・戻りリンク・言語切替・サイト内リンクのフッター。
 - `src/main.tsx` — クライアントの入り口。`#root` の中身の有無で hydrate と初回描画を選ぶ。
 - `src/entry-server.tsx` — プリレンダ用に `App` を文字列へ描画する。
-- `scripts/prerender.mjs` — ビルド後に各エントリ HTML の `#root` へ描画結果を差し込む。
+- `scripts/prerender.mjs` — ビルド後に各エントリ HTML の `#root` へ描画結果を差し込む。対象は `entry-server.tsx` の `renderAll()` が `ROUTES` から返す。
 - `src/index.css` — Tailwind のディレクティブ、フォーカスリング、広告枠 (`ins.adsbygoogle`) の配色と未充填時の非表示、`prefers-reduced-motion` でのアニメーション抑制。`.no-callout` は隠しジェスチャを置く要素が iOS Safari の長押しメニューを出さないためのもの。
 - `src/components/PageFrame.tsx` — 両画面で共通の枠。ヘッダ・言語切替・もう一方のページへの導線・フッターの折りたたみとプライバシーポリシーへのリンク。
 - `src/components/RouletteWheel.tsx` — SVG 描画。回転は CSS `transform` トランジション。
@@ -87,7 +91,7 @@ Node.js は 22.13 以上の偶数系（ESLint 10 の `engines` が 22.13 未満�
 クローラに本文を渡すため、ビルド時に React を静的 HTML へ焼き込んで `#root` に入れてある。
 JS が動く前から画面のテキストがすべて HTML にある。
 
-- `pnpm run build` は クライアントビルド → SSR バンドル (`dist-ssr/`) → `scripts/prerender.mjs` の順。焼き込む対象は `prerender.mjs` の `PAGES`。
+- `pnpm run build` は クライアントビルド → SSR バンドル (`dist-ssr/`) → `scripts/prerender.mjs` の順。焼き込む対象は `src/routes.ts` の `ROUTES`。
 - `BUILD_TARGET=ssr` のときと Vitest の実行中は `vite.config.ts` が `cloudflare()` を外す。どちらも Node で実行するため。
 - 表示言語とページを `window.location.pathname` から読むと SSR で落ちるので、`App` は `locale` と `page` を prop で受け取る。
   URL が唯一のソースである点は変わらない (`main.tsx` が `localeFromPath` / `pageFromPath` を呼ぶ)。
@@ -99,7 +103,7 @@ JS が動く前から画面のテキストがすべて HTML にある。
 
 ### ページと言語別 URL
 
-ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`、プライバシーポリシーが `/privacy/` と `/en/privacy/`。6 つとも独立した静的 HTML で、`vite.config.ts` の `build.rollupOptions.input` に並べてある。JS バンドルは共通で、react-router は入れない。
+ルーレットが `/` と `/en/`、順番決めが `/order/` と `/en/order/`、プライバシーポリシーが `/privacy/` と `/en/privacy/`、使い方ガイドが `/guide/` と `/en/guide/`。すべて独立した静的 HTML で、`ROUTES` から `vite.config.ts` の `build.rollupOptions.input` を組む。JS バンドルは共通で、react-router は入れない。
 
 - 未知のパスは `wrangler.jsonc` の `assets.not_found_handling: "404-page"` で 404 を返す。配るのは `public/404.html`（日本語）と `public/en/404.html`（英語。`/en/` 配下の未知パスにはこちらが最寄りとして選ばれる）。React・スクリプト・外部リソースを使わない静的 HTML で、`noindex`、sitemap には載せない。隠し操作を示唆する語は置かない。
 - `/app/privacy/` は iOS アプリ用のプライバシーポリシーで、`public/app/privacy/index.html` をそのまま配る。React・プリレンダ・`vite.config.ts` の `input` のどれも通らず、`noindex` で sitemap にも載せない。内容はアプリの実態（通信なし・解析なし・広告なし）で、Web 版の `privacySections` とは別に保つ。
@@ -108,7 +112,9 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - ブラウザの言語が表示中の言語と違うときは、もう一方の言語版へのリンクを最上部に出すだけにする。自動リダイレクトはしない。共有された URL の言語を上書きしてしまう。
 - 誘導リンクは閲覧者ごとに変わるので、マウント後に描画する（静的 HTML には出さない）。
 - どのページも自分自身への `canonical` と、`ja` / `en` / `x-default` の `hreflang` を持つ。`x-default` は同じページの日本語版に向ける。
-- 言語を増やすときに触るのは、`i18n.ts` の `LOCALES` / `PAGE_PATHS` / `translations`、エントリ HTML の追加、`vite.config.ts` の `input`、各ページの `hreflang`、`public/sitemap.xml`、`scripts/prerender.mjs` の `PAGES`。ページを増やすときも同じ 6 か所に加えて `i18n.ts` の `PAGES` / `pageFromPath` を触る。
+- 言語を増やすときに触るのは、`i18n.ts` の `LOCALES` / `PAGE_PATHS` / `translations`、エントリ HTML の追加、各ページの `hreflang`、`public/sitemap.xml`。ページを増やすときも同じ箇所に加えて `i18n.ts` の `PAGES` / `pageFromPath` を触る。`input` とプリレンダは `ROUTES` から自動で決まる。
+- 使い方ガイドの画像は、実画面を Playwright で撮ったスクリーンショット（WebP）と、同じ画面の操作を録画して作ったアニメーション WebP。`<img>` で出し、動画タグは使わない。言語ごとに `public/guide/media/<言語>-<キー>.webp` を置く。アニメーションには最後のコマの静止画 `<言語>-<キー>-still.webp` を添え、`prefers-reduced-motion` のときは `<picture>` で静止画に切り替える。画面の見た目を変えたら撮り直す。`routes.test.ts` がファイルの抜けを落とす。
+- 撮影する画面に隠し操作の痕跡（印・長押し）を映さない。ガイドの本文・代替テキストにも、隠し操作を示唆する語は書かない。`routes.test.ts` の禁止語検査が見張る。
 
 ### デザイントークン
 
@@ -126,9 +132,9 @@ JS が動く前から画面のテキストがすべて HTML にある。
 - 英語版の `<title>` / `<h1>` は一般語のみ（「Roulette」「Random Order」「Free」）。ブラウザのタブバーは画面共有に映るので、英語版の title を一般語にしている。ブランド語は `meta[name=description]` と JSON-LD の `alternateName` にだけ置く。
 - どちらの言語でも、隠し操作の手順（長押し）はフッターの折りたたみの外にも meta にもプライバシーポリシーにも書かない。
 - プライバシーポリシーは実装の実態に合わせる。Cookie・ブラウザの保存領域・外部送信・アクセス解析を増減したら `privacySections` と制定日の表記も直す。Cloudflare の Bot Fight Mode・チャレンジ・レート制限ルールなどを有効にすると Cloudflare が Cookie を付けるようになるので、その場合も直す。
-- アクセス解析は Cloudflare Web Analytics。ビーコンの `<script>` は 6 つのエントリ HTML に直書きしてあり、CSP の `script-src` / `connect-src` にある `cloudflareinsights` はそのため。Cookie もブラウザの保存領域も使わない。
+- アクセス解析は Cloudflare Web Analytics。ビーコンの `<script>` は全エントリ HTML に直書きしてあり、CSP の `script-src` / `connect-src` にある `cloudflareinsights` はそのため。Cookie もブラウザの保存領域も使わない。
 - `public/og.png` は Slack 等のリンク展開で映る可能性があるため、盤面だけの中立な絵にしてある。再生成する場合も仕込みを示唆する要素を入れない。
-- `public/robots.txt` / `public/sitemap.xml` / `public/ads.txt` はビルド時に `dist/` へコピーされる。sitemap は 6 URL すべてを載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
+- `public/robots.txt` / `public/sitemap.xml` / `public/ads.txt` はビルド時に `dist/` へコピーされる。sitemap は `ROUTES` の全 URL を載せ、各 `<url>` に `xhtml:link` で言語の対応関係を書く。
 - JSON-LD は `<script type="application/ld+json">`。データブロックなので CSP の `script-src` には引っかからない。
 
 ### 広告
@@ -138,7 +144,7 @@ Google AdSense の手動ユニットを `PageFrame` に 2 枠置く。フッタ�
 - プライバシーポリシーには広告を出さない。`PrivacyPage` は `PageFrame` を使わないので枠がなく、スクリプトも読まない。
 - `adsbygoogle.js` はエントリ HTML の `<head>` に書かず、`AdUnit` がマウント後に差し込む。広告枠のあるページだけで読むため。
 - 自動広告（アンカー・モバイル全画面を含む）は AdSense 管理画面でオフにしておく。挿入位置を制御できず、プリレンダした `#root` の中へ入ると hydration が崩れる。ページ間の移動で全画面広告が出るのもステルス前提の使い方を邪魔する。
-- パブリッシャー ID と広告ユニット ID は `src/config.ts` の `ADSENSE_CLIENT` / `AD_SLOTS`。`AD_SLOTS` が `null` の枠は描画せず、すべて `null` なら広告リクエストは一切飛ばない。`public/ads.txt` と、広告のある 4 つのエントリ HTML の `meta[name=google-adsense-account]`（サイト所有の確認用）の ID もこれと揃える。
+- パブリッシャー ID と広告ユニット ID は `src/config.ts` の `ADSENSE_CLIENT` / `AD_SLOTS`。`AD_SLOTS` が `null` の枠は描画せず、すべて `null` なら広告リクエストは一切飛ばない。`public/ads.txt` と、ツール画面・使い方ガイドのエントリ HTML の `meta[name=google-adsense-account]`（サイト所有の確認用）の ID もこれと揃える。
 - `AD_SLOTS` に ID を入れて広告を出すと Google が Cookie を使い、閲覧者の情報を受け取る。今の `privacySections` は広告を出していない実態（Cookie なし、提供先は Cloudflare のみ）を書いているので、広告を出す変更と同じ PR で「Cookie とブラウザへの保存」「第三者への提供」と制定日を直す。
 - 非表示の枠（`display:none`）へ push すると失敗してその枠は埋まらなくなるので、`AdUnit` は幅が付いてから push する。
 

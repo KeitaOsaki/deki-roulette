@@ -27,6 +27,7 @@
 | `/` `/en/` | ルーレット |
 | `/order/` `/en/order/` | 順番決め |
 | `/privacy/` `/en/privacy/` | プライバシーポリシー |
+| `/guide/` `/en/guide/` | 使い方ガイド（スクリーンショットとアニメーションで操作手順を説明） |
 | `/app/privacy/` | iOS アプリ用のプライバシーポリシー（`noindex`） |
 
 `/app/privacy/` 以外は React で組み、ビルド時に静的 HTML へ焼き込むので、JS が動く前から本文が HTML に入っています。

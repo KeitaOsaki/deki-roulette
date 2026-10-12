@@ -126,6 +126,116 @@ export const translations = {
       },
     ],
     privacyEstablished: "2026 年 9 月 24 日 制定",
+    guideNavLabel: "使い方ガイド",
+    footerNavLabel: "サイト内リンク",
+    guideTitle: "使い方ガイド",
+    guideMetaTitle: "使い方ガイド｜ルーレットと順番決めの操作手順｜デキレーレット",
+    guideMetaDescription:
+      "ルーレットと順番決めの使い方を、実際の画面のスクリーンショットとアニメーションで順に説明します。項目の追加、スピンと並べ替え、結果のコピーまで。",
+    guideLead:
+      "ルーレットと順番決めの操作手順を、実際の画面とアニメーションで説明します。登録もインストールも要りません。スマホでも PC でも、同じ手順で使えます。",
+    guideOpenRoulette: "ルーレットを開く",
+    guideOpenOrder: "順番決めを開く",
+    guideSections: [
+      {
+        id: "roulette",
+        title: "ルーレットの使い方",
+        intro:
+          "複数の候補から 1 つを選ぶときに使います。幹事を 1 人決める、ランチのお店を 1 軒決める、といった場面に向いています。",
+        steps: [
+          {
+            title: "項目を追加する",
+            body: [
+              "入力欄に候補を書いて「追加」を押すと、リストとルーレットに加わります。Enter キーでも追加できます。",
+              "項目は 2 個から 24 個まで、1 項目あたり 20 文字までです。最初から「ラーメン」「寿司」「焼肉」の 3 つが入っているので、そのまま試せます。",
+            ],
+            media: "roulette-add",
+            alt: "入力欄に「うどん」と書いて「追加」を押すと、項目のリストが 3 つから 4 つに増える様子",
+          },
+          {
+            title: "スピンする",
+            body: [
+              "「スピン」を押すとルーレットが回り、数秒かけてゆっくり止まります。止まった位置の項目が、結果として大きく表示されます。",
+              "回っている間は、項目の追加・編集・削除はできません。やり直したいときは、止まってからもう一度スピンを押してください。",
+            ],
+            media: "roulette-spin",
+            alt: "スピンを押すとルーレットが回り、止まると結果が表示される様子",
+          },
+          {
+            title: "結果をコピーして共有する",
+            body: [
+              "結果の下の「結果をコピー」を押すと、結果と候補の一覧がテキストとしてクリップボードに入ります。チャットやメモにそのまま貼り付けて共有できます。",
+              "コピーされるのは、このボタンを押したときだけです。",
+            ],
+            media: "roulette-copy",
+            alt: "結果の下の「結果をコピー」を押すと、表示が「コピーしました」に変わる画面",
+          },
+        ],
+      },
+      {
+        id: "order",
+        title: "順番決めの使い方",
+        intro:
+          "全員の並び順をまとめて決めるときに使います。発表の順番、席順、当番表づくりに向いています。",
+        steps: [
+          {
+            title: "項目を追加する",
+            body: [
+              "ルーレットと同じく、入力欄に書いて「追加」を押します。項目は 2 個から 24 個までです。",
+              "最初から「A チーム」から「D チーム」までの 4 つが入っています。人の名前やチーム名に書き換えて使ってください。",
+            ],
+            media: "order-add",
+            alt: "入力欄に「E チーム」と書いて追加すると、リストの項目が 4 つから 5 つに増える様子",
+          },
+          {
+            title: "並べ替える",
+            body: [
+              "「並べ替え」を押すと、1 位から順に 1 件ずつ現れます。すべて出そろうまで、項目の追加や編集はできません。",
+              "もう一度押すと、新しい並びに引き直します。何度でもやり直せます。",
+            ],
+            media: "order-shuffle",
+            alt: "並べ替えを押すと、結果の欄に 1 位から順に項目が 1 件ずつ現れる様子",
+          },
+          {
+            title: "結果をコピーして共有する",
+            body: [
+              "「結果をコピー」を押すと、順位つきの結果がテキストとしてクリップボードに入ります。",
+              "グループのチャットに貼り付ければ、全員が同じ順番を見られます。",
+            ],
+            media: "order-copy",
+            alt: "順位つきの結果の下で「結果をコピー」を押すと、表示が「コピーしました」に変わる画面",
+          },
+        ],
+      },
+    ],
+    guideTipsTitle: "知っておくと便利なこと",
+    guideTips: [
+      "項目の直し方: 各項目の鉛筆のボタンで書き換え、右端のボタンで削除できます。",
+      "ルーレットと順番決めの使い分け: 1 つだけ選ぶならルーレット、全員を並べるなら順番決めです。",
+      "入力した内容の扱い: 項目も結果もブラウザの中だけで処理します。サーバへは送らず、ページを閉じたり再読み込みしたりすると消えます。",
+      "動きが苦手なとき: 端末の「視差効果を減らす」などの設定に従って、演出を抑えます。順番決めの結果は 1 件ずつではなく、一度に表示されます。",
+      "英語版: ページの右上の言語切り替えから、同じページの英語版に移れます。",
+    ],
+    guideFaqTitle: "よくある質問",
+    guideFaq: [
+      {
+        q: "無料で使えますか。登録は必要ですか。",
+        a: "無料です。会員登録もアプリのインストールも要りません。ブラウザでページを開けば使えます。",
+      },
+      {
+        q: "項目はいくつまで入れられますか。",
+        a: "ルーレットも順番決めも、2 個から 24 個までです。1 項目あたり 20 文字まで入力できます。",
+      },
+      {
+        q: "スマートフォンでも使えますか。",
+        a: "使えます。画面の幅に合わせて表示が変わり、タッチ操作に対応しています。",
+      },
+      {
+        q: "不具合や要望はどこに伝えればよいですか。",
+        a: "GitHub の Issue で受け付けています。端末とブラウザの種類、どの画面で何をしたかを書いていただけると、原因を調べやすくなります。",
+      },
+    ],
+    guideIssuesLabel: "GitHub Issues を開く",
   },
   en: {
     localeName: "English",
@@ -252,6 +362,116 @@ export const translations = {
       },
     ],
     privacyEstablished: "Effective September 24, 2026",
+    guideNavLabel: "Usage guide",
+    footerNavLabel: "Site links",
+    guideTitle: "Usage Guide",
+    guideMetaTitle: "Usage Guide｜Roulette and Random Order, Step by Step｜Roulette",
+    guideMetaDescription:
+      "How to use the roulette and the random order tool, shown with real screenshots and animations: adding items, spinning and shuffling, and copying the result.",
+    guideLead:
+      "Here is how the roulette and the random order tool work, shown on the real screens. There is nothing to sign up for or install, and the steps are the same on a phone and on a computer.",
+    guideOpenRoulette: "Open the roulette",
+    guideOpenOrder: "Open the random order tool",
+    guideSections: [
+      {
+        id: "roulette",
+        title: "Using the roulette",
+        intro:
+          "Use it to pick one item out of several, such as one organizer or one place to eat.",
+        steps: [
+          {
+            title: "Add items",
+            body: [
+              "Type a candidate into the field and press “Add”. It joins both the list and the wheel. The Enter key works too.",
+              "You can have 2 to 24 items, with up to 20 characters each. Three items (ramen, sushi and yakiniku) are already in the list, so you can try it right away.",
+            ],
+            media: "roulette-add",
+            alt: "Typing “Udon” and pressing Add grows the list of items from three to four",
+          },
+          {
+            title: "Spin",
+            body: [
+              "Press “Spin” and the wheel turns, slowing to a stop over a few seconds. The item where it stops is shown large as the result.",
+              "While the wheel is turning, items cannot be added, edited or removed. To go again, wait for it to stop and press Spin once more.",
+            ],
+            media: "roulette-spin",
+            alt: "Pressing Spin turns the wheel, and the result appears when it stops",
+          },
+          {
+            title: "Copy and share the result",
+            body: [
+              "Press “Copy result” under the result and the result and the list of candidates go to your clipboard as text. Paste it straight into a chat or a note.",
+              "Nothing is copied unless you press this button.",
+            ],
+            media: "roulette-copy",
+            alt: "Pressing Copy result under the result changes the label to Copied",
+          },
+        ],
+      },
+      {
+        id: "order",
+        title: "Using the random order tool",
+        intro:
+          "Use it to arrange everyone at once, for a running order, seating or a chore chart.",
+        steps: [
+          {
+            title: "Add items",
+            body: [
+              "As with the roulette, type into the field and press “Add”. You can have 2 to 24 items.",
+              "Four items, Team A to Team D, are already there. Replace them with names or teams of your own.",
+            ],
+            media: "order-add",
+            alt: "Typing “Team E” and pressing Add grows the list from four items to five",
+          },
+          {
+            title: "Shuffle",
+            body: [
+              "Press “Shuffle” and the items appear one by one from first place. Items cannot be added or edited until they have all appeared.",
+              "Press it again to draw a new order, as many times as you like.",
+            ],
+            media: "order-shuffle",
+            alt: "Pressing Shuffle makes the items appear one by one in the result area, starting from first place",
+          },
+          {
+            title: "Copy and share the result",
+            body: [
+              "Press “Copy result” and the ranked result goes to your clipboard as text.",
+              "Paste it into the group chat so that everyone sees the same order.",
+            ],
+            media: "order-copy",
+            alt: "Pressing Copy result under the ranked result changes the label to Copied",
+          },
+        ],
+      },
+    ],
+    guideTipsTitle: "Good to know",
+    guideTips: [
+      "Fixing items: the pencil button next to an item edits it, and the button at the right end removes it.",
+      "Roulette or random order: use the roulette to pick one, and the random order tool to arrange everyone.",
+      "What happens to your input: items and results are processed only in your browser. Nothing is sent to a server, and everything disappears when you close or reload the page.",
+      "If you find motion uncomfortable: the tools tone down their animation when your device has a setting such as “reduce motion” turned on. On the random order tool, the results then appear all at once.",
+      "Japanese version: use the language switch at the top right of any page to move to the same page in the other language.",
+    ],
+    guideFaqTitle: "Frequently asked questions",
+    guideFaq: [
+      {
+        q: "Is it free? Do I need to sign up?",
+        a: "It is free. There is no registration and nothing to install. Open the page in a browser and it works.",
+      },
+      {
+        q: "How many items can I enter?",
+        a: "Both tools accept 2 to 24 items, with up to 20 characters each.",
+      },
+      {
+        q: "Does it work on a phone?",
+        a: "Yes. The layout adapts to the width of the screen and works with touch.",
+      },
+      {
+        q: "Where do I report a problem or make a request?",
+        a: "Through GitHub Issues. Telling us your device, your browser, and what you did on which screen helps us find the cause.",
+      },
+    ],
+    guideIssuesLabel: "Open GitHub Issues",
   },
 } as const;
 
@@ -259,7 +479,7 @@ export type T = (typeof translations)[Locale];
 
 export const LOCALES = ["ja", "en"] as const satisfies readonly Locale[];
 
-export const PAGES = ["roulette", "order", "privacy"] as const;
+export const PAGES = ["roulette", "order", "privacy", "guide"] as const;
 
 export type Page = (typeof PAGES)[number];
 
@@ -268,6 +488,7 @@ export const PAGE_PATHS = {
   roulette: { ja: "/", en: "/en/" },
   order: { ja: "/order/", en: "/en/order/" },
   privacy: { ja: "/privacy/", en: "/en/privacy/" },
+  guide: { ja: "/guide/", en: "/en/guide/" },
 } as const satisfies Record<Page, Record<Locale, string>>;
 
 /** 表示言語は URL だけで決まる。クローラが見た HTML と画面が食い違わないための約束。 */

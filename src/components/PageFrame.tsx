@@ -9,6 +9,12 @@ import LocaleSwitch from "./LocaleSwitch";
 const SUMMARY_CLASS =
   "flex cursor-pointer list-none items-center gap-2 text-base font-bold text-ivory before:text-muted before:transition-transform before:content-['▸'] group-open:before:rotate-90 [&::-webkit-details-marker]:hidden";
 
+const FOOTER_LINKS = ["guide", "privacy"] as const;
+const FOOTER_LINK_LABELS: Record<(typeof FOOTER_LINKS)[number], (t: T) => string> = {
+  guide: (t) => t.guideNavLabel,
+  privacy: (t) => t.privacyLinkLabel,
+};
+
 const SIDE_AD_STYLE: CSSProperties = { display: "inline-block", width: 160, height: 600 };
 const FOOTER_AD_STYLE: CSSProperties = { display: "block" };
 
@@ -108,12 +114,17 @@ export default function PageFrame({
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pb-2 text-xs text-muted">
             <p>&copy; 2026 basekeita</p>
-            <a
-              href={PAGE_PATHS.privacy[locale]}
-              className="underline decoration-ink-500 underline-offset-4 transition-colors hover:text-ivory hover:decoration-ivory"
-            >
-              {t.privacyLinkLabel}
-            </a>
+            <nav aria-label={t.footerNavLabel} className="flex flex-wrap gap-x-5 gap-y-2">
+              {FOOTER_LINKS.map((target) => (
+                <a
+                  key={target}
+                  href={PAGE_PATHS[target][locale]}
+                  className="underline decoration-ink-500 underline-offset-4 transition-colors hover:text-ivory hover:decoration-ivory"
+                >
+                  {FOOTER_LINK_LABELS[target](t)}
+                </a>
+              ))}
+            </nav>
           </div>
         </footer>
       </div>
